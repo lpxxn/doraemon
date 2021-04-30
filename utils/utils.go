@@ -1,0 +1,63 @@
+package utils
+
+import "fmt"
+
+type Color string
+
+const (
+	Red     Color = "red"
+	Green         = "green"
+	Cyan          = "cyan"
+	Yellow        = "yellow"
+	NoColor       = ""
+)
+
+// BeautifyText function for send (colored or common) message to output.
+func BeautifyText(text string, color Color) string {
+	// Define variables.
+	var (
+		red       string = "\033[0;31m"
+		green     string = "\033[0;32m"
+		cyan      string = "\033[0;36m"
+		yellow    string = "\033[1;33m"
+		noColor   string = "\033[0m"
+		textColor string
+	)
+
+	// Switch color.
+	switch color {
+	case NoColor:
+		textColor = noColor
+	case Green:
+		textColor = green
+	case Yellow:
+		textColor = yellow
+	case Red:
+		textColor = red
+	case Cyan:
+		textColor = cyan
+	}
+
+	// Send common or colored text.
+	return textColor + text + noColor
+}
+
+// SendMsg function forsend message to output.
+func SendMsg(startWithNewLine bool, caption, text string, color Color, endWithNewLine bool) {
+	// Define variables.
+	var startNewLine, endNewLine string
+
+	if startWithNewLine {
+		startNewLine = "\n" // set new line
+	}
+
+	if endWithNewLine {
+		endNewLine = "\n" // set new line
+	}
+
+	if caption == "" {
+		fmt.Println(startNewLine + text + endNewLine) // common text
+	} else {
+		fmt.Println(startNewLine + BeautifyText(caption, color) + " " + text + endNewLine) // colorized text
+	}
+}
