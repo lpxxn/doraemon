@@ -6,6 +6,7 @@ type Color string
 
 const (
 	Red     Color = "red"
+	Blue          = "blue"
 	Green         = "green"
 	Cyan          = "cyan"
 	Yellow        = "yellow"
@@ -20,6 +21,7 @@ func BeautifyText(text string, color Color) string {
 		green     string = "\033[0;32m"
 		cyan      string = "\033[0;36m"
 		yellow    string = "\033[1;33m"
+		blue      string = "\033[0;34m"
 		noColor   string = "\033[0m"
 		textColor string
 	)
@@ -28,6 +30,8 @@ func BeautifyText(text string, color Color) string {
 	switch color {
 	case NoColor:
 		textColor = noColor
+	case Blue:
+		textColor = blue
 	case Green:
 		textColor = green
 	case Yellow:
