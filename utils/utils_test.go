@@ -39,13 +39,14 @@ func TestDotBar(t *testing.T) {
 */
 
 func TestDotBar1(t *testing.T) {
-	for i := 1000; i > 0; i-- {
-		fmt.Printf("%s", "\r.  ")
-		time.Sleep(time.Second / 2)
+	for i := 5; i > 0; i-- {
+		//fmt.Printf("%s", "\r.  ")
+		fmt.Printf("\x1B[?25l%s", "\r.  ")
+		time.Sleep(time.Second / 4)
 		fmt.Print("\r.. ")
-		time.Sleep(time.Second / 2)
+		time.Sleep(time.Second / 4)
 		fmt.Print("\r...")
-		time.Sleep(time.Second / 2)
+		time.Sleep(time.Second / 4)
 	}
 }
 
