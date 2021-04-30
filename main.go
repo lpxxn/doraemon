@@ -1,1 +1,103 @@
-package doraemon
+package main
+
+import (
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"strings"
+
+	"github.com/c-bata/go-prompt"
+	"github.com/creack/pty"
+)
+
+func completer(d prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		{Text: "users", Description: "Store the username and age"},
+		{Text: "articles", Description: "Store the article text posted by user"},
+		{Text: "comments", Description: "Store the text commented to articles"},
+	}
+	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+}
+
+func main() {
+	for _, env := range os.Environ() {
+		// env is
+		envPair := strings.SplitN(env, "=", 2)
+		key := envPair[0]
+		value := envPair[1]
+
+		fmt.Printf("%s : %s\n", key, value)
+	}
+	fmt.Println("Please select table.")
+	t := prompt.Input("👻 > ", completer)
+	fmt.Println("You selected " + t)
+
+	cmd := exec.Command("/bin/sh", "-c", "cafe_sandbox_test1")
+	cmd.Env = append(os.Environ())
+	if err := cmd.Run(); err != nil {
+		fmt.Print(err)
+	}
+	if err := RunCmd("cafe_sandbox_test1"); err != nil {
+		fmt.Print(err)
+	}
+}
+
+func RunCmd(cmdStr string, cmdDir ...string) error {
+	var err error
+	fmt.Println("begin run command")
+	cmd, stdout, stderr, err := startCmd(cmdStr, cmdDir...)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		stdout.Close()
+		stderr.Close()
+	}()
+	io.Copy(os.Stdout, stdout)
+	io.Copy(os.Stderr, stderr)
+	// wait for building
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func startCmd(cmd string, cmdDir ...string) (*exec.Cmd, io.ReadCloser, io.ReadCloser, error) {
+	c := exec.Command("/bin/sh", "-c", cmd)
+	c.Env = append(os.Environ())
+
+	if len(cmdDir) > 0 && cmdDir[0] != "" {
+		c.Dir = cmdDir[0]
+	}
+	f, err := pty.Start(c)
+	return c, f, f, err
+}
+
+func RunSSHCmd(remoteMachine string, cmdStr string) error {
+	var err error
+	fmt.Println("begin run command")
+	cmd, stdout, stderr, err := startSSHCmd(remoteMachine, cmdStr)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		stdout.Close()
+		stderr.Close()
+	}()
+	io.Copy(os.Stdout, stdout)
+	io.Copy(os.Stderr, stderr)
+	// wait for building
+	err = cmd.Wait()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func startSSHCmd(remoteMachine string, cmd string) (*exec.Cmd, io.ReadCloser, io.ReadCloser, error) {
+	c := exec.Command("ssh", remoteMachine, cmd)
+	f, err := pty.Start(c)
+	return c, f, f, err
+}
