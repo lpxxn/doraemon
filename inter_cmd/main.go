@@ -20,7 +20,7 @@ func main() {
 	//}
 
 	for i := 1000; i > 0; i-- {
-		fmt.Printf("%s", "\r.  ")
+		fmt.Printf("\x1B[?25l%s", "\r.  ")
 		time.Sleep(time.Second / 2)
 		fmt.Print("\r.. ")
 		time.Sleep(time.Second / 2)
