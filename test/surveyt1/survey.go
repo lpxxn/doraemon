@@ -42,6 +42,5 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-
 	fmt.Printf("%s chose %s.", answers.Name, answers.FavoriteColor)
 }
