@@ -7,18 +7,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/c-bata/go-prompt"
 	"github.com/creack/pty"
 )
 
-func completer(d prompt.Document) []prompt.Suggest {
-	s := []prompt.Suggest{
-		{Text: "users", Description: "Store the username and age"},
-		{Text: "articles", Description: "Store the article text posted by user"},
-		{Text: "comments", Description: "Store the text commented to articles"},
-	}
-	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
-}
 
 func main() {
 	for _, env := range os.Environ() {
@@ -29,15 +20,14 @@ func main() {
 
 		fmt.Printf("%s : %s\n", key, value)
 	}
-	fmt.Println("Please select table.")
-	t := prompt.Input("👻 > ", completer)
-	fmt.Println("You selected " + t)
 
-	cmd := exec.Command("/bin/sh", "-c", "cafe_sandbox_test1")
+
+	cmd := exec.Command("ssh", "cafetest1dev")
 	cmd.Env = append(os.Environ())
 	if err := cmd.Run(); err != nil {
 		fmt.Print(err)
 	}
+	fmt.Println(cmd.Wait())
 	if err := RunCmd("cafe_sandbox_test1"); err != nil {
 		fmt.Print(err)
 	}
@@ -65,7 +55,7 @@ func RunCmd(cmdStr string, cmdDir ...string) error {
 }
 
 func startCmd(cmd string, cmdDir ...string) (*exec.Cmd, io.ReadCloser, io.ReadCloser, error) {
-	c := exec.Command("/bin/sh", "-c", cmd)
+	c := exec.Command("/bin/zsh",  cmd)
 	c.Env = append(os.Environ())
 
 	if len(cmdDir) > 0 && cmdDir[0] != "" {
