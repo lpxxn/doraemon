@@ -10,7 +10,10 @@
 .DS_Store
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-
+go-prompt
+!go-prompt/
+surveyt1
+!surveyt1/
 doraemon
 !doraemon/
 # Dependency directories (remove the comment below to include it)
