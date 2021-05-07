@@ -5,6 +5,7 @@
 *.so
 *.dylib
 *.toml
+doraemon.toml
 # Test binary, built with `go test -c`
 *.test
 .DS_Store
