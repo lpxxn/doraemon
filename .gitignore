@@ -11,6 +11,8 @@ doraemon.toml
 .DS_Store
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+.env
+*.env
 go-prompt
 !go-prompt/
 surveyt1

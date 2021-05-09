@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/lpxxn/doraemon/ssh_utils"
 	"golang.org/x/crypto/ssh"
 )
@@ -16,6 +17,13 @@ func main() {
 	user := "ec2-user"
 	privateKey := "/Users/li/.ssh/my_test.pem"
 	//termlog := "./test_termlog"
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	if envHost := os.Getenv("SSH_HOST"); len(envHost) > 0 {
+		host = envHost
+	}
 
 	pemBytes, err := ioutil.ReadFile(privateKey)
 	if err != nil {
