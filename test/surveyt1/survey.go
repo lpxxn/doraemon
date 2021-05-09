@@ -23,6 +23,11 @@ var qs = []*survey.Question{
 		},
 	},
 	{
+		Name: "desc",
+		Prompt:    &survey.Input{Message: "What is your name?"},
+		Transform: survey.Title,
+	},
+	{
 		Name:   "age",
 		Prompt: &survey.Input{Message: "How old are you?"},
 	},
