@@ -96,9 +96,9 @@ func (s *sshClient) setupShell(session *ssh.Session) error {
 		}
 	}
 	// Request tty
-	return RequestTty(session)
+	return s.RequestTty(session)
 }
-func RequestTty(session *ssh.Session) error {
+func (s *sshClient) RequestTty(session *ssh.Session) error {
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,
 		ssh.TTY_OP_ISPEED: 14400,
