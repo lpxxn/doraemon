@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,8 +26,8 @@ type sshClient struct {
 	logFile      string
 }
 
-func CreateSSHClient(host, port, user string, authMethods []ssh.AuthMethod) (*sshClient, error) {
-	uri := net.JoinHostPort(host, port)
+func CreateSSHClient(uri, user string, authMethods []ssh.AuthMethod) (*sshClient, error) {
+	//uri := net.JoinHostPort(host, port)
 	config := &ssh.ClientConfig{
 		User:            user,
 		Auth:            authMethods,

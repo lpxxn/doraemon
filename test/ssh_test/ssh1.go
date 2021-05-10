@@ -12,8 +12,7 @@ import (
 )
 
 func main() {
-	host := "5.8.1.4"
-	port := "22"
+	host := "5.8.1.4:22"
 	user := "ec2-user"
 	privateKey := "/Users/li/.ssh/my_test.pem"
 	//termlog := "./test_termlog"
@@ -34,7 +33,7 @@ func main() {
 		log.Fatalf("parse key failed:%v", err)
 	}
 
-	client, err := ssh_utils.CreateSSHClient(host, port, user, []ssh.AuthMethod{ssh.PublicKeys(signer)})
+	client, err := ssh_utils.CreateSSHClient(host, user, []ssh.AuthMethod{ssh.PublicKeys(signer)})
 	if err != nil {
 		panic(err)
 	}
