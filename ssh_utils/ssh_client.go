@@ -15,15 +15,14 @@ import (
 )
 
 type sshClient struct {
-	Client  *ssh.Client
-	sshOpts *SSHOpts
-
+	Client       *ssh.Client
+	proxyConf    *SSHConfig
 	logging      bool
 	logTimestamp bool
 	logFile      string
 }
 
-type SSHOpts struct {
+type SSHConfig struct {
 	URI         string
 	User        string
 	AuthMethods []ssh.AuthMethod
@@ -34,24 +33,65 @@ var (
 	defaultTimeout = time.Second * 10
 )
 
-func CreateSSHClient(o SSHOpts) (*sshClient, error) {
-	//uri := net.JoinHostPort(host, port)
-	timeout := defaultTimeout
-	if o.Timout > 0 {
-		timeout = o.Timout
+type option func(client *sshClient)
+
+func ProxyConfig(sshOpts *SSHConfig) option {
+	return func(client *sshClient) {
+		client.proxyConf = sshOpts
 	}
-	config := &ssh.ClientConfig{
-		User:            o.User,
-		Auth:            o.AuthMethods,
+}
+
+func CreateSSHClient(conf SSHConfig, opts ...option) (*sshClient, error) {
+	//uri := net.JoinHostPort(host, port)
+	c := &sshClient{}
+	timeout := defaultTimeout
+	if conf.Timout > 0 {
+		timeout = conf.Timout
+	}
+	targetSSHConfig := &ssh.ClientConfig{
+		User:            conf.User,
+		Auth:            conf.AuthMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         timeout,
 	}
-	conn, err := ssh.Dial("tcp", o.URI, config)
-
-	if err != nil {
-		return nil, err
+	for _, o := range opts {
+		o(c)
 	}
-	return &sshClient{Client: conn}, nil
+	var connClient *ssh.Client
+	var err error
+	if c.proxyConf == nil {
+		if connClient, err = ssh.Dial("tcp", conf.URI, targetSSHConfig); err != nil {
+			return nil, err
+		}
+	} else {
+		timeout := defaultTimeout
+		if conf.Timout > 0 {
+			timeout = c.proxyConf.Timout
+		}
+		proxySSHConf := &ssh.ClientConfig{
+			User:            c.proxyConf.User,
+			Auth:            c.proxyConf.AuthMethods,
+			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Timeout:         timeout,
+		}
+		proxyClient, err := ssh.Dial("tcp", c.proxyConf.URI, proxySSHConf)
+		if err != nil {
+			return nil, err
+		}
+		conn, err := proxyClient.Dial("tcp", conf.URI)
+		if err != nil {
+			return nil, err
+		}
+		ncc, newCh, reqs, err := ssh.NewClientConn(conn, conf.URI, targetSSHConfig)
+		if err != nil {
+			return nil, err
+		}
+
+		connClient = ssh.NewClient(ncc, newCh, reqs)
+	}
+
+	c.Client = connClient
+	return c, nil
 }
 
 func (s *sshClient) SetLog(path string, timestamp bool) {
