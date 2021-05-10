@@ -15,25 +15,38 @@ import (
 )
 
 type sshClient struct {
-	Client *ssh.Client
-	Stdin  io.Reader
-	Stdout io.Writer
-	Stderr io.Writer
+	Client  *ssh.Client
+	sshOpts *SSHOpts
 
 	logging      bool
 	logTimestamp bool
 	logFile      string
 }
 
-func CreateSSHClient(uri, user string, authMethods []ssh.AuthMethod) (*sshClient, error) {
+type SSHOpts struct {
+	URI         string
+	User        string
+	AuthMethods []ssh.AuthMethod
+	Timout      time.Duration
+}
+
+var (
+	defaultTimeout = time.Second * 10
+)
+
+func CreateSSHClient(o SSHOpts) (*sshClient, error) {
 	//uri := net.JoinHostPort(host, port)
-	config := &ssh.ClientConfig{
-		User:            user,
-		Auth:            authMethods,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         10 * time.Second,
+	timeout := defaultTimeout
+	if o.Timout > 0 {
+		timeout = o.Timout
 	}
-	conn, err := ssh.Dial("tcp", uri, config)
+	config := &ssh.ClientConfig{
+		User:            o.User,
+		Auth:            o.AuthMethods,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         timeout,
+	}
+	conn, err := ssh.Dial("tcp", o.URI, config)
 
 	if err != nil {
 		return nil, err
