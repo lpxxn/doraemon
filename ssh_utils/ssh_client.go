@@ -15,11 +15,10 @@ import (
 )
 
 type sshClient struct {
-	Client  *ssh.Client
-	Session *ssh.Session
-	Stdin   io.Reader
-	Stdout  io.Writer
-	Stderr  io.Writer
+	Client *ssh.Client
+	Stdin  io.Reader
+	Stdout io.Writer
+	Stderr io.Writer
 
 	logging      bool
 	logTimestamp bool
