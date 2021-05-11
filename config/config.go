@@ -1,14 +1,28 @@
 package config
 
 import (
+	"time"
+
 	"github.com/BurntSushi/toml"
 )
 
 type LoginConfig struct {
+	SSHInfo   []*sshInfo   `toml:"sshInfo"`
 	LoginInfo []*loginInfo `toml:"loginInfo"`
 }
 
 var LoginConf *LoginConfig
+
+type sshInfo struct {
+	Name          string        `toml:"name"`
+	AuthMethod    string        `toml:"authMethod"`
+	URI           string        `toml:"uri"`
+	User          string        `toml:"user"`
+	PublicKeyPath string        `toml:"publicKeyPath"`
+	Timout        time.Duration `toml:"timout"`
+	ProxySSHName  string        `toml:"proxySSHName"`
+	Desc          string        `toml:"desc"`
+}
 
 type loginInfo struct {
 	URL          string `toml:"url"`

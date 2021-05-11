@@ -14,6 +14,19 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+type AuthMethod string
+
+const (
+	PublicKey AuthMethod = "publickey"
+)
+
+var AuthMethodList map[AuthMethod]struct{} = map[AuthMethod]struct{}{PublicKey: {}}
+
+func VerifyAuthMethod(m AuthMethod) bool {
+	_, ok := AuthMethodList[m]
+	return ok
+}
+
 type sshClient struct {
 	Client       *ssh.Client
 	proxyConf    *SSHConfig
@@ -23,6 +36,7 @@ type sshClient struct {
 }
 
 type SSHConfig struct {
+	AuthMethod  AuthMethod
 	URI         string
 	User        string
 	AuthMethods []ssh.AuthMethod
