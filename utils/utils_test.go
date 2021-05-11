@@ -48,18 +48,20 @@ func TestDotBar1(t *testing.T) {
 		fmt.Print("\r...")
 		time.Sleep(time.Second / 4)
 	}
+	fmt.Println(Show())
 }
 
 //  go test -v -gcflags all="-N -l"  -run TestConsole
 func TestConsole(t *testing.T) {
 	s := NewSpinner("working...")
 	isTTY := isTTY()
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		if isTTY {
 			s.Tick()
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
+	fmt.Println(Show())
 }
 
 //var spinChars = `|/-\`
