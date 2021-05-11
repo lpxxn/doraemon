@@ -61,7 +61,7 @@ func TestConsole(t *testing.T) {
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	fmt.Println(Show())
+	//fmt.Println(Show())
 }
 
 //var spinChars = `|/-\`
@@ -105,3 +105,8 @@ func isTTY() bool {
 	}
 	return fi.Mode()&os.ModeCharDevice != 0
 }
+
+/*
+echo -e "\033[?25l"
+echo -e "\033[?25h"
+*/

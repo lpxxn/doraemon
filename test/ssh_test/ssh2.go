@@ -36,7 +36,7 @@ func main() {
 		log.Fatalf("parse key failed:%v", err)
 	}
 
-	client, err := ssh_utils.CreateSSHClient(ssh_utils.SSHConfig{
+	client, err := ssh_utils.CreateSSHClient(&ssh_utils.SSHConfig{
 		URI:         host,
 		User:        user,
 		AuthMethods: []ssh.AuthMethod{ssh.PublicKeys(signer)},
@@ -57,7 +57,6 @@ func main() {
 	// Start ssh shell
 	if err := client.Shell(session); err != nil {
 		panic(err)
-
 	}
 }
 

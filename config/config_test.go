@@ -16,7 +16,7 @@ func TestGetConfig(t *testing.T) {
 }
 
 func TestWriteConf(t *testing.T) {
-	conf := &LoginConfig{LoginInfo: []*loginInfo{
+	conf := &appConfig{LoginInfo: []*loginInfo{
 		&loginInfo{
 			URL:          "urltest",
 			ClientID:     "ac",
@@ -66,7 +66,7 @@ func TestDecode(t *testing.T) {
   pwd = "asdfasdf"
   pwdUseMin = false
 `
-	conf := &LoginConfig{}
+	conf := &appConfig{}
 	if _, err := toml.Decode(src, conf); err != nil {
 		t.Fatal(err)
 	}

@@ -55,7 +55,7 @@ func ProxyConfig(sshOpts *SSHConfig) option {
 	}
 }
 
-func CreateSSHClient(conf SSHConfig, opts ...option) (*sshClient, error) {
+func CreateSSHClient(conf *SSHConfig, opts ...option) (*sshClient, error) {
 	//uri := net.JoinHostPort(host, port)
 	c := &sshClient{}
 	timeout := defaultTimeout
