@@ -3,6 +3,7 @@ package config
 import (
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -17,13 +18,13 @@ type appConfig struct {
 
 var LoginConf *appConfig
 
-func (a *appConfig) ConfigByName(name string) *sshInfo {
+func (a *appConfig) ConfigByName(name string) (*sshInfo, error) {
 	for _, item := range a.SSHInfo {
 		if item.Name == name {
-			return item
+			return item, nil
 		}
 	}
-	return nil
+	return nil, os.ErrNotExist
 }
 
 type sshInfo struct {
@@ -46,25 +47,32 @@ type loginInfo struct {
 	PwdUseMin    bool   `toml:"pwdUseMin"`
 }
 
-func (s *sshInfo) ToSSHConfig() *ssh_utils.SSHConfig {
+func (s *sshInfo) ToSSHConfig() (*ssh_utils.SSHConfig, error) {
 	sshConf := &ssh_utils.SSHConfig{
-		URI:         s.URI,
-		User:        s.User,
-		AuthMethods: nil,
-		Timout:      s.Timout,
+		AuthMethodName: ssh_utils.AuthMethod(s.AuthMethod),
+		URI:            s.URI,
+		User:           s.User,
+		AuthMethods:    nil,
+		Timout:         s.Timout,
 	}
-	if ssh_utils.AuthMethod(s.AuthMethod) == ssh_utils.PublicKey {
+	if sshConf.AuthMethodName == ssh_utils.PublicKey {
 		pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
 		if err != nil {
 			log.Fatal(err)
+			return nil, err
 		}
 		signer, err := ssh.ParsePrivateKey(pemBytes)
 		if err != nil {
 			log.Fatalf("parse key failed:%v", err)
+			return nil, err
 		}
 		sshConf.AuthMethods = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 	}
-	return sshConf
+	return sshConf, nil
+}
+
+func (s *sshInfo) HaveProxy() bool {
+	return len(s.ProxySSHName) > 0
 }
 
 func ParseConfig() error {

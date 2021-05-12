@@ -36,26 +36,26 @@ type sshClient struct {
 }
 
 type SSHConfig struct {
-	AuthMethod  AuthMethod
-	URI         string
-	User        string
-	AuthMethods []ssh.AuthMethod
-	Timout      time.Duration
+	AuthMethodName AuthMethod
+	URI            string
+	User           string
+	AuthMethods    []ssh.AuthMethod
+	Timout         time.Duration
 }
 
 var (
 	defaultTimeout = time.Second * 10
 )
 
-type option func(client *sshClient)
+type SSHClientOption func(client *sshClient)
 
-func ProxyConfig(sshOpts *SSHConfig) option {
+func ProxyConfig(sshOpts *SSHConfig) SSHClientOption {
 	return func(client *sshClient) {
 		client.proxyConf = sshOpts
 	}
 }
 
-func CreateSSHClient(conf *SSHConfig, opts ...option) (*sshClient, error) {
+func CreateSSHClient(conf *SSHConfig, opts ...SSHClientOption) (*sshClient, error) {
 	//uri := net.JoinHostPort(host, port)
 	c := &sshClient{}
 	timeout := defaultTimeout
