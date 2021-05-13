@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/lpxxn/doraemon/ssh_utils"
+	"github.com/lpxxn/doraemon/utils"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -36,11 +36,11 @@ func main() {
 		log.Fatalf("parse key failed:%v", err)
 	}
 
-	client, err := ssh_utils.CreateSSHClient(&ssh_utils.SSHConfig{
+	client, err := utils.CreateSSHClient(&utils.SSHConfig{
 		URI:         host,
 		User:        user,
 		AuthMethods: []ssh.AuthMethod{ssh.PublicKeys(signer)},
-	}, ssh_utils.ProxyConfig(proxyConf()))
+	}, utils.ProxyConfig(proxyConf()))
 	if err != nil {
 		panic(err)
 	}
@@ -60,8 +60,8 @@ func main() {
 	}
 }
 
-func proxyConf() *ssh_utils.SSHConfig {
-	rev := &ssh_utils.SSHConfig{}
+func proxyConf() *utils.SSHConfig {
+	rev := &utils.SSHConfig{}
 	if envProxyHost := os.Getenv("SSH_PROXY_HOST"); len(envProxyHost) > 0 {
 		rev.URI = envProxyHost
 	}

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/lpxxn/doraemon/config"
-	"github.com/lpxxn/doraemon/ssh_utils"
 	"github.com/lpxxn/doraemon/utils"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +31,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	clientOpts := make([]ssh_utils.SSHClientOption, 0)
+	clientOpts := make([]utils.SSHClientOption, 0)
 	if sandbox1Conf.HaveProxy() {
 		proxyConfig, err := config.LoginConf.ConfigByName(sandbox1Conf.ProxySSHName)
 		if err != nil {
@@ -42,9 +41,9 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		clientOpts = append(clientOpts, ssh_utils.ProxyConfig(proxySSHConf))
+		clientOpts = append(clientOpts, utils.ProxyConfig(proxySSHConf))
 	}
-	client, err := ssh_utils.CreateSSHClient(sandbox1SSHConf, clientOpts...)
+	client, err := utils.CreateSSHClient(sandbox1SSHConf, clientOpts...)
 	if err != nil {
 		panic(err)
 	}

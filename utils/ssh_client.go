@@ -1,4 +1,4 @@
-package ssh_utils
+package utils
 
 import (
 	"bytes"

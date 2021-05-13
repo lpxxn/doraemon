@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/lpxxn/doraemon/ssh_utils"
+	"github.com/lpxxn/doraemon/utils"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -47,15 +47,15 @@ type loginInfo struct {
 	PwdUseMin    bool   `toml:"pwdUseMin"`
 }
 
-func (s *sshInfo) ToSSHConfig() (*ssh_utils.SSHConfig, error) {
-	sshConf := &ssh_utils.SSHConfig{
-		AuthMethodName: ssh_utils.AuthMethod(s.AuthMethod),
+func (s *sshInfo) ToSSHConfig() (*utils.SSHConfig, error) {
+	sshConf := &utils.SSHConfig{
+		AuthMethodName: utils.AuthMethod(s.AuthMethod),
 		URI:            s.URI,
 		User:           s.User,
 		AuthMethods:    nil,
 		Timout:         s.Timout,
 	}
-	if sshConf.AuthMethodName == ssh_utils.PublicKey {
+	if sshConf.AuthMethodName == utils.PublicKey {
 		pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
 		if err != nil {
 			log.Fatal(err)

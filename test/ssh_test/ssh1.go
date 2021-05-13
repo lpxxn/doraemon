@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/lpxxn/doraemon/ssh_utils"
+	"github.com/lpxxn/doraemon/utils"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -33,7 +33,7 @@ func main() {
 		log.Fatalf("parse key failed:%v", err)
 	}
 
-	client, err := ssh_utils.CreateSSHClient(&ssh_utils.SSHConfig{
+	client, err := utils.CreateSSHClient(&utils.SSHConfig{
 		URI:         host,
 		User:        user,
 		AuthMethods: []ssh.AuthMethod{ssh.PublicKeys(signer)},
