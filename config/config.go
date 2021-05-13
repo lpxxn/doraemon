@@ -47,13 +47,13 @@ type loginInfo struct {
 	PwdUseMin    bool   `toml:"pwdUseMin"`
 }
 
-func (s *sshInfo) ToSSHConfig() (*utils.SSHConfig, error) {
-	sshConf := &utils.SSHConfig{
-		AuthMethodName: utils.AuthMethod(s.AuthMethod),
-		URI:            s.URI,
-		User:           s.User,
-		AuthMethods:    nil,
-		Timout:         s.Timout,
+func (s *sshInfo) ToSSHConfig() (*utils.SSHPrivateKeyConfig, error) {
+	sshConf := &utils.SSHPrivateKeyConfig{
+		MethodName:  utils.AuthMethod(s.AuthMethod),
+		URI:         s.URI,
+		User:        s.User,
+		AuthMethods: nil,
+		Timout:      s.Timout,
 	}
 	if sshConf.AuthMethodName == utils.PublicKey {
 		pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)

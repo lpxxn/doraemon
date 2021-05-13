@@ -27,20 +27,62 @@ func VerifyAuthMethod(m AuthMethod) bool {
 	return ok
 }
 
+type SSHDial interface {
+	Dial() (*ssh.Client, error)
+	SSHConfig() *ssh.ClientConfig
+	AuthMethodName() AuthMethod
+}
+
 type sshClient struct {
 	Client       *ssh.Client
-	proxyConf    *SSHConfig
+	proxyConf    *SSHPrivateKeyConfig
 	logging      bool
 	logTimestamp bool
 	logFile      string
 }
 
-type SSHConfig struct {
-	AuthMethodName AuthMethod
-	URI            string
-	User           string
-	AuthMethods    []ssh.AuthMethod
-	Timout         time.Duration
+type SSHPrivateKeyConfig struct {
+	MethodName  AuthMethod
+	URI         string
+	User        string
+	AuthMethods []ssh.AuthMethod
+	Timout      time.Duration
+	Proxy       SSHDial
+}
+
+func (s *SSHPrivateKeyConfig) Dial() (*ssh.Client, error) {
+	if s.Proxy == nil {
+		return ssh.Dial("tcp", s.URI, s.SSHConfig())
+	}
+	proxyClient, err := s.Proxy.Dial()
+	if err != nil {
+		return nil, err
+	}
+	conn, err := proxyClient.Dial("tcp", s.URI)
+	if err != nil {
+		return nil, err
+	}
+	ncc, newCh, reqs, err := ssh.NewClientConn(conn, s.URI, s.SSHConfig())
+	if err != nil {
+		return nil, err
+	}
+
+	return ssh.NewClient(ncc, newCh, reqs), nil
+}
+func (s *SSHPrivateKeyConfig) SSHConfig() *ssh.ClientConfig {
+	timeout := defaultTimeout
+	if s.Timout > 0 {
+		timeout = s.Timout
+	}
+	return &ssh.ClientConfig{
+		User:            s.User,
+		Auth:            s.AuthMethods,
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         timeout,
+	}
+}
+func (s *SSHPrivateKeyConfig) AuthMethodName() AuthMethod {
+	return s.MethodName
 }
 
 var (
@@ -49,13 +91,13 @@ var (
 
 type SSHClientOption func(client *sshClient)
 
-func ProxyConfig(sshOpts *SSHConfig) SSHClientOption {
+func ProxyConfig(sshOpts *SSHPrivateKeyConfig) SSHClientOption {
 	return func(client *sshClient) {
 		client.proxyConf = sshOpts
 	}
 }
 
-func CreateSSHClient(conf *SSHConfig, opts ...SSHClientOption) (*sshClient, error) {
+func CreateSSHClient(conf *SSHPrivateKeyConfig, opts ...SSHClientOption) (*sshClient, error) {
 	//uri := net.JoinHostPort(host, port)
 	c := &sshClient{}
 	timeout := defaultTimeout

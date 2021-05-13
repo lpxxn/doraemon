@@ -36,7 +36,7 @@ func main() {
 		log.Fatalf("parse key failed:%v", err)
 	}
 
-	client, err := utils.CreateSSHClient(&utils.SSHConfig{
+	client, err := utils.CreateSSHClient(&utils.SSHPrivateKeyConfig{
 		URI:         host,
 		User:        user,
 		AuthMethods: []ssh.AuthMethod{ssh.PublicKeys(signer)},
@@ -60,8 +60,8 @@ func main() {
 	}
 }
 
-func proxyConf() *utils.SSHConfig {
-	rev := &utils.SSHConfig{}
+func proxyConf() *utils.SSHPrivateKeyConfig {
+	rev := &utils.SSHPrivateKeyConfig{}
 	if envProxyHost := os.Getenv("SSH_PROXY_HOST"); len(envProxyHost) > 0 {
 		rev.URI = envProxyHost
 	}
