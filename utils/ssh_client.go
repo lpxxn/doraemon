@@ -27,10 +27,16 @@ func VerifyAuthMethod(m AuthMethod) bool {
 	return ok
 }
 
-type SSHDial interface {
-	Dial() (*ssh.Client, error)
+type SSHConfig interface {
+	//	Dial() (*ssh.Client, error)
 	SSHConfig() *ssh.ClientConfig
 	AuthMethodName() AuthMethod
+	GetProxy() SSHConfig
+	GetURI() string
+}
+
+type SSHDial interface {
+	NewSSHClient(conf SSHConfig) (*sshClient, error)
 }
 
 type sshClient struct {
@@ -47,42 +53,75 @@ type SSHPrivateKeyConfig struct {
 	User        string
 	AuthMethods []ssh.AuthMethod
 	Timout      time.Duration
-	Proxy       SSHDial
+	Proxy       SSHConfig
 }
 
-func (s *SSHPrivateKeyConfig) Dial() (*ssh.Client, error) {
-	if s.Proxy == nil {
-		return ssh.Dial("tcp", s.URI, s.SSHConfig())
-	}
-	proxyClient, err := s.Proxy.Dial()
+func NewSSHClient(c SSHConfig) (*sshClient, error) {
+	client, err := newSSHClient(c)
 	if err != nil {
 		return nil, err
 	}
-	conn, err := proxyClient.Dial("tcp", s.URI)
+	return &sshClient{Client: client}, nil
+}
+func newSSHClient(c SSHConfig) (*ssh.Client, error) {
+	if c.GetProxy() == nil {
+		return ssh.Dial("tcp", c.GetURI(), c.SSHConfig())
+	}
+	proxyClient, err := newSSHClient(c.GetProxy())
 	if err != nil {
 		return nil, err
 	}
-	ncc, newCh, reqs, err := ssh.NewClientConn(conn, s.URI, s.SSHConfig())
+	conn, err := proxyClient.Dial("tcp", c.GetURI())
+	if err != nil {
+		return nil, err
+	}
+	ncc, newCh, reqs, err := ssh.NewClientConn(conn, c.GetURI(), c.SSHConfig())
 	if err != nil {
 		return nil, err
 	}
 
 	return ssh.NewClient(ncc, newCh, reqs), nil
 }
-func (s *SSHPrivateKeyConfig) SSHConfig() *ssh.ClientConfig {
+
+//func (c *SSHPrivateKeyConfig) Dial() (*ssh.Client, error) {
+//	if c.Proxy == nil {
+//		return ssh.Dial("tcp", c.URI, c.SSHConfig())
+//	}
+//	proxyClient, err := c.Proxy.Dial()
+//	if err != nil {
+//		return nil, err
+//	}
+//	conn, err := proxyClient.Dial("tcp", c.URI)
+//	if err != nil {
+//		return nil, err
+//	}
+//	ncc, newCh, reqs, err := ssh.NewClientConn(conn, c.URI, c.SSHConfig())
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return ssh.NewClient(ncc, newCh, reqs), nil
+//}
+func (c *SSHPrivateKeyConfig) SSHConfig() *ssh.ClientConfig {
 	timeout := defaultTimeout
-	if s.Timout > 0 {
-		timeout = s.Timout
+	if c.Timout > 0 {
+		timeout = c.Timout
 	}
 	return &ssh.ClientConfig{
-		User:            s.User,
-		Auth:            s.AuthMethods,
+		User:            c.User,
+		Auth:            c.AuthMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         timeout,
 	}
 }
-func (s *SSHPrivateKeyConfig) AuthMethodName() AuthMethod {
-	return s.MethodName
+func (c *SSHPrivateKeyConfig) AuthMethodName() AuthMethod {
+	return c.MethodName
+}
+func (c *SSHPrivateKeyConfig) GetProxy() SSHConfig {
+	return c.Proxy
+}
+func (c *SSHPrivateKeyConfig) GetURI() string {
+	return c.URI
 }
 
 var (
