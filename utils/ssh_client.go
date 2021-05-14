@@ -28,7 +28,6 @@ func VerifyAuthMethod(m AuthMethod) bool {
 }
 
 type SSHConfig interface {
-	//	Dial() (*ssh.Client, error)
 	SSHConfig() *ssh.ClientConfig
 	AuthMethodName() AuthMethod
 	GetProxy() SSHConfig
@@ -63,6 +62,7 @@ func NewSSHClient(c SSHConfig) (*sshClient, error) {
 	}
 	return &sshClient{Client: client}, nil
 }
+
 func newSSHClient(c SSHConfig) (*ssh.Client, error) {
 	if c.GetProxy() == nil {
 		return ssh.Dial("tcp", c.GetURI(), c.SSHConfig())
@@ -83,25 +83,6 @@ func newSSHClient(c SSHConfig) (*ssh.Client, error) {
 	return ssh.NewClient(ncc, newCh, reqs), nil
 }
 
-//func (c *SSHPrivateKeyConfig) Dial() (*ssh.Client, error) {
-//	if c.Proxy == nil {
-//		return ssh.Dial("tcp", c.URI, c.SSHConfig())
-//	}
-//	proxyClient, err := c.Proxy.Dial()
-//	if err != nil {
-//		return nil, err
-//	}
-//	conn, err := proxyClient.Dial("tcp", c.URI)
-//	if err != nil {
-//		return nil, err
-//	}
-//	ncc, newCh, reqs, err := ssh.NewClientConn(conn, c.URI, c.SSHConfig())
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return ssh.NewClient(ncc, newCh, reqs), nil
-//}
 func (c *SSHPrivateKeyConfig) SSHConfig() *ssh.ClientConfig {
 	timeout := defaultTimeout
 	if c.Timout > 0 {
