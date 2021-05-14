@@ -9,6 +9,7 @@ doraemon.toml
 # Test binary, built with `go test -c`
 *.test
 .DS_Store
+.idea/
 cmd
 !com/
 # Output of the go coverage tool, specifically when used with LiteIDE
