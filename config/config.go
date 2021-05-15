@@ -106,7 +106,7 @@ func ParseConfig() error {
 		return err
 	}
 	if LoginConf == nil {
-		LoginConf = new(appConfig)
+		LoginConf = &appConfig{sshMapInfo: map[string]*sshInfo{}}
 	}
 	if _, err = toml.DecodeReader(f, LoginConf); err != nil {
 		return err
