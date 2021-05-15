@@ -50,6 +50,7 @@ type SSHPrivateKeyConfig struct {
 	MethodName  AuthMethod
 	URI         string
 	User        string
+	Passphrase  string
 	AuthMethods []ssh.AuthMethod
 	Timout      time.Duration
 	Proxy       SSHConfig

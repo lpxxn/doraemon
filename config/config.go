@@ -58,6 +58,7 @@ type sshInfo struct {
 	URI           string        `toml:"uri"`
 	User          string        `toml:"user"`
 	PublicKeyPath string        `toml:"publicKeyPath"`
+	Passphrase    string        `toml:"passphrase"`
 	Timout        time.Duration `toml:"timout"`
 	ProxySSHName  string        `toml:"proxySSHName"`
 	Desc          string        `toml:"desc"`
@@ -79,6 +80,7 @@ func (s *sshInfo) ToSSHConfig() (*utils.SSHPrivateKeyConfig, error) {
 		User:        s.User,
 		AuthMethods: nil,
 		Timout:      s.Timout,
+		Passphrase:  s.Passphrase,
 	}
 	if sshConf.AuthMethodName() == utils.PublicKey {
 		pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
@@ -86,9 +88,14 @@ func (s *sshInfo) ToSSHConfig() (*utils.SSHPrivateKeyConfig, error) {
 			log.Fatal(err)
 			return nil, err
 		}
-		signer, err := ssh.ParsePrivateKey(pemBytes)
+		var signer ssh.Signer
+		if len(s.Passphrase) > 0 {
+			signer, err = ssh.ParsePrivateKeyWithPassphrase(pemBytes, []byte(s.Passphrase))
+		} else {
+			signer, err = ssh.ParsePrivateKey(pemBytes)
+		}
 		if err != nil {
-			log.Fatalf("parse key failed:%v", err)
+			log.Printf("parse key failed:%v", err)
 			return nil, err
 		}
 		sshConf.AuthMethods = []ssh.AuthMethod{ssh.PublicKeys(signer)}

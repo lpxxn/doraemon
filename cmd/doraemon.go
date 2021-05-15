@@ -28,12 +28,16 @@ func initConf() error {
 	return nil
 }
 
+// 👻 >
+//const consolePrefix = "⚡️>>> "
+const consolePrefix = "🤪 >> "
+
 func main() {
 	if err := initConf(); err != nil {
 		panic(err)
 	}
 	fmt.Println("Please select ssh name.")
-	sshName := prompt.Input("👻 > ", sshCompleter)
+	sshName := prompt.Input(consolePrefix, sshCompleter)
 	fmt.Println("You selected " + sshName)
 	sshConfig, err := config.SSHConfigByName(sshName)
 	if err != nil {
