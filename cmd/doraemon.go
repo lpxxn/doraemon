@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/lpxxn/doraemon/config"
@@ -32,31 +31,41 @@ func initConf() error {
 //const consolePrefix = "⚡️>>> "
 const consolePrefix = "🤪 >> "
 
+var existCommand = map[string]struct{}{"exit": {}, ":q": {}}
+
 func main() {
 	if err := initConf(); err != nil {
 		panic(err)
 	}
-	fmt.Println("Please select ssh name.")
-	sshName := prompt.Input(consolePrefix, sshCompleter)
-	fmt.Println("You selected " + sshName)
-	sshConfig, err := config.SSHConfigByName(sshName)
-	if err != nil {
-		panic(err)
-	}
-	client, err := utils.NewSSHClient(sshConfig)
-	if err != nil {
-		panic(err)
-	}
-	// Create Session
-	session, err := client.CreateSession()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	for {
+		fmt.Println("Please select ssh name.")
+		sshName := prompt.Input(consolePrefix, sshCompleter)
+		//fmt.Println("You selected " + sshName)
+		if _, ok := existCommand[sshName]; ok {
+			fmt.Println("👋👋👋 bye ~")
+			return
+		}
+		sshConfig, err := config.SSHConfigByName(sshName)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		client, err := utils.NewSSHClient(sshConfig)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		// Create Session
+		session, err := client.CreateSession()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 
-	// Start ssh shell
-	if err := client.Shell(session); err != nil {
-		fmt.Println(err)
+		// Start ssh shell
+		if err := client.Shell(session); err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
