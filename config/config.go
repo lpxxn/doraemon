@@ -1,6 +1,8 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,9 +13,12 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+var ()
+
 type appConfig struct {
-	SSHInfo   []*sshInfo   `toml:"sshInfo"`
-	LoginInfo []*loginInfo `toml:"loginInfo"`
+	SSHInfo    []*sshInfo   `toml:"sshInfo"`
+	LoginInfo  []*loginInfo `toml:"loginInfo"`
+	sshMapInfo map[string]*sshInfo
 }
 
 var LoginConf *appConfig
@@ -25,6 +30,26 @@ func (a *appConfig) ConfigByName(name string) (*sshInfo, error) {
 		}
 	}
 	return nil, os.ErrNotExist
+}
+
+func (a *appConfig) SSHConfig(sshName string) (*utils.SSHPrivateKeyConfig, error) {
+	item, ok := a.sshMapInfo[sshName]
+	if !ok {
+		return nil, sshConfigNotExist(sshName)
+	}
+	sshConfig, err := item.ToSSHConfig()
+	if err != nil {
+		return nil, err
+	}
+	if !item.HaveProxy() {
+		return sshConfig, nil
+	}
+	proxyConfig, err := a.sshMapInfo[item.ProxySSHName].ToSSHConfig()
+	if err != nil {
+		return nil, err
+	}
+	sshConfig.Proxy = proxyConfig
+	return sshConfig, nil
 }
 
 type sshInfo struct {
@@ -55,7 +80,7 @@ func (s *sshInfo) ToSSHConfig() (*utils.SSHPrivateKeyConfig, error) {
 		AuthMethods: nil,
 		Timout:      s.Timout,
 	}
-	if sshConf.AuthMethodName == utils.PublicKey {
+	if sshConf.AuthMethodName() == utils.PublicKey {
 		pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
 		if err != nil {
 			log.Fatal(err)
@@ -83,6 +108,28 @@ func ParseConfig() error {
 	if LoginConf == nil {
 		LoginConf = new(appConfig)
 	}
-	_, err = toml.DecodeReader(f, LoginConf)
-	return err
+	if _, err = toml.DecodeReader(f, LoginConf); err != nil {
+		return err
+	}
+	// verify
+	var proxyName []string
+	for _, item := range LoginConf.SSHInfo {
+		if _, ok := LoginConf.sshMapInfo[item.Name]; ok {
+			continue
+		}
+		LoginConf.sshMapInfo[item.Name] = item
+		if item.HaveProxy() {
+			proxyName = append(proxyName, item.Name)
+		}
+	}
+	for _, item := range proxyName {
+		if _, ok := LoginConf.sshMapInfo[item]; !ok {
+			return sshConfigNotExist(item)
+		}
+	}
+	return nil
+}
+
+func sshConfigNotExist(name string) error {
+	return errors.New(fmt.Sprintf("ssh [%s] info not in config", name))
 }
