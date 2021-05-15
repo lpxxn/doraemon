@@ -32,8 +32,8 @@ func (a *appConfig) ConfigByName(name string) (*sshInfo, error) {
 	return nil, os.ErrNotExist
 }
 
-func (a *appConfig) SSHConfig(sshName string) (*utils.SSHPrivateKeyConfig, error) {
-	item, ok := a.sshMapInfo[sshName]
+func SSHConfigByName(sshName string) (*utils.SSHPrivateKeyConfig, error) {
+	item, ok := LoginConf.sshMapInfo[sshName]
 	if !ok {
 		return nil, sshConfigNotExist(sshName)
 	}
@@ -44,7 +44,7 @@ func (a *appConfig) SSHConfig(sshName string) (*utils.SSHPrivateKeyConfig, error
 	if !item.HaveProxy() {
 		return sshConfig, nil
 	}
-	proxyConfig, err := a.sshMapInfo[item.ProxySSHName].ToSSHConfig()
+	proxyConfig, err := LoginConf.sshMapInfo[item.ProxySSHName].ToSSHConfig()
 	if err != nil {
 		return nil, err
 	}

@@ -23,7 +23,7 @@ func main() {
 	}
 	fmt.Println(*config.LoginConf)
 	config.OpenConfDir()
-	sshConfig, err := config.LoginConf.SSHConfig("sandbox1")
+	sshConfig, err := config.SSHConfigByName("sandbox1")
 	if err != nil {
 		panic(err)
 	}
