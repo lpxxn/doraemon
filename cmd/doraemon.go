@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/c-bata/go-prompt"
 	"github.com/lpxxn/doraemon/config"
 	"github.com/lpxxn/doraemon/utils"
 	"github.com/spf13/cobra"
@@ -17,13 +18,24 @@ var loginCmd = &cobra.Command{
 	Run:     runLoginCmd,
 }
 
-func main() {
+func initConf() error {
 	if err := config.ParseConfig(); err != nil {
+		return err
+	}
+	// fmt.Println(*config.LoginConf)
+	// config.OpenConfDir()
+	setSSHSuggest()
+	return nil
+}
+
+func main() {
+	if err := initConf(); err != nil {
 		panic(err)
 	}
-	fmt.Println(*config.LoginConf)
-	config.OpenConfDir()
-	sshConfig, err := config.SSHConfigByName("sandbox1")
+	fmt.Println("Please select ssh name.")
+	sshName := prompt.Input("👻 > ", sshCompleter)
+	fmt.Println("You selected " + sshName)
+	sshConfig, err := config.SSHConfigByName(sshName)
 	if err != nil {
 		panic(err)
 	}
@@ -31,34 +43,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	/*
-		sandbox1Conf, err := config.LoginConf.ConfigByName("sandbox1")
-		if err != nil {
-			panic(err)
-		}
-		sandbox1SSHConf, err := sandbox1Conf.ToSSHConfig()
-		if err != nil {
-			panic(err)
-		}
-		clientOpts := make([]utils.SSHClientOption, 0)
-		if sandbox1Conf.HaveProxy() {
-			proxyConfig, err := config.LoginConf.ConfigByName(sandbox1Conf.ProxySSHName)
-			if err != nil {
-				panic(err)
-			}
-			proxySSHConf, err := proxyConfig.ToSSHConfig()
-			if err != nil {
-				panic(err)
-			}
-			clientOpts = append(clientOpts, utils.ProxyConfig(proxySSHConf))
-		}
-		client, err := utils.CreateSSHClient(sandbox1SSHConf, clientOpts...)
-		if err != nil {
-			panic(err)
-		}
-
-		/*
-	*/
 	// Create Session
 	session, err := client.CreateSession()
 	if err != nil {
@@ -68,10 +52,26 @@ func main() {
 
 	// Start ssh shell
 	if err := client.Shell(session); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }
 
 func runLoginCmd(cmd *cobra.Command, args []string) {
 	utils.SendMsg(true, "go ...", "login ~", utils.Yellow, true)
+}
+
+var sshSuggest []prompt.Suggest
+
+func sshCompleter(d prompt.Document) []prompt.Suggest {
+	return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
+}
+
+func setSSHSuggest() {
+	sshSuggest = sshSuggest[:0]
+	for _, item := range config.LoginConf.SSHInfo {
+		sshSuggest = append(sshSuggest, prompt.Suggest{
+			Text:        item.Name,
+			Description: item.Desc,
+		})
+	}
 }
