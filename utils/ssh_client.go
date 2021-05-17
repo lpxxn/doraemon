@@ -194,7 +194,9 @@ func (s *sshClient) Shell(session *ssh.Session) (err error) {
 	if err != nil {
 		return
 	}
-
+	var buf bytes.Buffer
+	buf.WriteString("ls; pwd; whoami;\n")
+	session.Stdin = io.MultiReader(&buf, session.Stdin)
 	// Start shell
 	err = session.Shell()
 	if err != nil {
