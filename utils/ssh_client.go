@@ -31,7 +31,9 @@ type SSHConfig interface {
 	SSHConfig() *ssh.ClientConfig
 	AuthMethodName() AuthMethod
 	GetProxy() SSHConfig
+	SetProxy(proxyConfig SSHConfig)
 	GetURI() string
+	GetStartCommand() string
 }
 
 type SSHDial interface {
@@ -40,20 +42,25 @@ type SSHDial interface {
 
 type sshClient struct {
 	Client       *ssh.Client
-	proxyConf    *SSHPrivateKeyConfig
+	config       SSHConfig
 	logging      bool
 	logTimestamp bool
 	logFile      string
 }
 
+type SSHBaseConfig struct {
+	MethodName   AuthMethod
+	URI          string
+	User         string
+	Passphrase   string
+	AuthMethods  []ssh.AuthMethod
+	Timout       time.Duration
+	Proxy        SSHConfig
+	StartCommand string
+}
+
 type SSHPrivateKeyConfig struct {
-	MethodName  AuthMethod
-	URI         string
-	User        string
-	Passphrase  string
-	AuthMethods []ssh.AuthMethod
-	Timout      time.Duration
-	Proxy       SSHConfig
+	*SSHBaseConfig
 }
 
 func NewSSHClient(c SSHConfig) (*sshClient, error) {
@@ -61,7 +68,7 @@ func NewSSHClient(c SSHConfig) (*sshClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &sshClient{Client: client}, nil
+	return &sshClient{Client: client, config: c}, nil
 }
 
 func newSSHClient(c SSHConfig) (*ssh.Client, error) {
@@ -84,7 +91,7 @@ func newSSHClient(c SSHConfig) (*ssh.Client, error) {
 	return ssh.NewClient(ncc, newCh, reqs), nil
 }
 
-func (c *SSHPrivateKeyConfig) SSHConfig() *ssh.ClientConfig {
+func (c *SSHBaseConfig) SSHConfig() *ssh.ClientConfig {
 	timeout := defaultTimeout
 	if c.Timout > 0 {
 		timeout = c.Timout
@@ -96,14 +103,22 @@ func (c *SSHPrivateKeyConfig) SSHConfig() *ssh.ClientConfig {
 		Timeout:         timeout,
 	}
 }
-func (c *SSHPrivateKeyConfig) AuthMethodName() AuthMethod {
+func (c *SSHBaseConfig) AuthMethodName() AuthMethod {
 	return c.MethodName
 }
-func (c *SSHPrivateKeyConfig) GetProxy() SSHConfig {
+func (c *SSHBaseConfig) GetProxy() SSHConfig {
 	return c.Proxy
 }
-func (c *SSHPrivateKeyConfig) GetURI() string {
+
+func (c *SSHBaseConfig) SetProxy(proxyConfig SSHConfig) {
+	c.Proxy = proxyConfig
+}
+
+func (c *SSHBaseConfig) GetURI() string {
 	return c.URI
+}
+func (c *SSHBaseConfig) GetStartCommand() string {
+	return c.StartCommand
 }
 
 var (
@@ -133,9 +148,13 @@ func (s *sshClient) Shell(session *ssh.Session) (err error) {
 	if err != nil {
 		return
 	}
-	var buf bytes.Buffer
-	buf.WriteString("ls; pwd; whoami;\n")
-	session.Stdin = io.MultiReader(&buf, session.Stdin)
+
+	if len(s.config.GetStartCommand()) > 0 {
+		var buf bytes.Buffer
+		buf.WriteString(s.config.GetStartCommand() + "\n")
+		session.Stdin = io.MultiReader(&buf, session.Stdin)
+	}
+
 	// Start shell
 	err = session.Shell()
 	if err != nil {

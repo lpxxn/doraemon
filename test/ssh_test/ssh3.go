@@ -34,7 +34,7 @@ func main() {
 }
 
 func mConf() *utils.SSHPrivateKeyConfig {
-	rev := &utils.SSHPrivateKeyConfig{MethodName: utils.PublicKey}
+	rev := &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{MethodName: utils.PublicKey, StartCommand: "ls -l; whoami"}}
 	if envHost := os.Getenv("SSH_HOST"); len(envHost) > 0 {
 		rev.URI = envHost
 	}
@@ -57,7 +57,7 @@ func mConf() *utils.SSHPrivateKeyConfig {
 }
 
 func proxyConf() *utils.SSHPrivateKeyConfig {
-	rev := &utils.SSHPrivateKeyConfig{MethodName: utils.PublicKey}
+	rev := &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{MethodName: utils.PublicKey}}
 	if envProxyHost := os.Getenv("SSH_PROXY_HOST"); len(envProxyHost) > 0 {
 		rev.URI = envProxyHost
 	}
