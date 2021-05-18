@@ -110,67 +110,6 @@ var (
 	defaultTimeout = time.Second * 10
 )
 
-type SSHClientOption func(client *sshClient)
-
-func ProxyConfig(sshOpts *SSHPrivateKeyConfig) SSHClientOption {
-	return func(client *sshClient) {
-		client.proxyConf = sshOpts
-	}
-}
-
-func CreateSSHClient(conf *SSHPrivateKeyConfig, opts ...SSHClientOption) (*sshClient, error) {
-	//uri := net.JoinHostPort(host, port)
-	c := &sshClient{}
-	timeout := defaultTimeout
-	if conf.Timout > 0 {
-		timeout = conf.Timout
-	}
-	targetSSHConfig := &ssh.ClientConfig{
-		User:            conf.User,
-		Auth:            conf.AuthMethods,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         timeout,
-	}
-	for _, o := range opts {
-		o(c)
-	}
-	var connClient *ssh.Client
-	var err error
-	if c.proxyConf == nil {
-		if connClient, err = ssh.Dial("tcp", conf.URI, targetSSHConfig); err != nil {
-			return nil, err
-		}
-	} else {
-		timeout := defaultTimeout
-		if conf.Timout > 0 {
-			timeout = c.proxyConf.Timout
-		}
-		proxySSHConf := &ssh.ClientConfig{
-			User:            c.proxyConf.User,
-			Auth:            c.proxyConf.AuthMethods,
-			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-			Timeout:         timeout,
-		}
-		proxyClient, err := ssh.Dial("tcp", c.proxyConf.URI, proxySSHConf)
-		if err != nil {
-			return nil, err
-		}
-		conn, err := proxyClient.Dial("tcp", conf.URI)
-		if err != nil {
-			return nil, err
-		}
-		ncc, newCh, reqs, err := ssh.NewClientConn(conn, conf.URI, targetSSHConfig)
-		if err != nil {
-			return nil, err
-		}
-
-		connClient = ssh.NewClient(ncc, newCh, reqs)
-	}
-
-	c.Client = connClient
-	return c, nil
-}
-
 func (s *sshClient) SetLog(path string, timestamp bool) {
 	s.logging = true
 	s.logFile = path
