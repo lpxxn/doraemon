@@ -32,7 +32,7 @@ func (a *appConfig) ConfigByName(name string) (*sshInfo, error) {
 	return nil, os.ErrNotExist
 }
 
-func SSHConfigByName(sshName string) (*utils.SSHPrivateKeyConfig, error) {
+func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
 	item, ok := LoginConf.sshMapInfo[sshName]
 	if !ok {
 		return nil, sshConfigNotExist(sshName)
@@ -48,7 +48,7 @@ func SSHConfigByName(sshName string) (*utils.SSHPrivateKeyConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	sshConfig.Proxy = proxyConfig
+	sshConfig.SetProxy(proxyConfig)
 	return sshConfig, nil
 }
 
@@ -62,6 +62,7 @@ type sshInfo struct {
 	Timout        time.Duration `toml:"timout"`
 	ProxySSHName  string        `toml:"proxySSHName"`
 	Desc          string        `toml:"desc"`
+	StartCommand  string        `toml:"startCommand"`
 }
 
 type loginInfo struct {
@@ -73,16 +74,19 @@ type loginInfo struct {
 	PwdUseMin    bool   `toml:"pwdUseMin"`
 }
 
-func (s *sshInfo) ToSSHConfig() (*utils.SSHPrivateKeyConfig, error) {
-	sshConf := &utils.SSHPrivateKeyConfig{
-		MethodName:  utils.AuthMethod(s.AuthMethod),
-		URI:         s.URI,
-		User:        s.User,
-		AuthMethods: nil,
-		Timout:      s.Timout,
-		Passphrase:  s.Passphrase,
-	}
-	if sshConf.AuthMethodName() == utils.PublicKey {
+func (s *sshInfo) ToSSHConfig() (utils.SSHConfig, error) {
+	authMethod := utils.AuthMethod(s.AuthMethod)
+	if authMethod == utils.PublicKey {
+		sshConf := &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{
+			MethodName:   authMethod,
+			URI:          s.URI,
+			User:         s.User,
+			AuthMethods:  nil,
+			Timout:       s.Timout,
+			Passphrase:   s.Passphrase,
+			StartCommand: s.StartCommand,
+		},
+		}
 		pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
 		if err != nil {
 			log.Fatal(err)
@@ -99,8 +103,9 @@ func (s *sshInfo) ToSSHConfig() (*utils.SSHPrivateKeyConfig, error) {
 			return nil, err
 		}
 		sshConf.AuthMethods = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+		return sshConf, nil
 	}
-	return sshConf, nil
+	return nil, errors.New("ToSSHConfig error invalid authMethod")
 }
 
 func (s *sshInfo) HaveProxy() bool {
