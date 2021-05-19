@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -18,6 +19,13 @@ var confFileName = "doraemon.toml"
 func GetConfig() (*os.File, error) {
 	confPath := ConfFilePath()
 	if _, err := os.Stat(confPath); os.IsNotExist(err) {
+		// if not exit create and open the config dir
+		defer func() {
+			err := OpenConfDir()
+			if err != nil {
+				fmt.Println("open conf dir error")
+			}
+		}()
 		return os.Create(confPath)
 	}
 	//return os.OpenFile(confPath, os.O_RDWR, 0666)
