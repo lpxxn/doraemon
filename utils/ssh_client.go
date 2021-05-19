@@ -18,6 +18,7 @@ type AuthMethod string
 
 const (
 	PublicKey AuthMethod = "publickey"
+	Password AuthMethod = "password"
 )
 
 var AuthMethodList map[AuthMethod]struct{} = map[AuthMethod]struct{}{PublicKey: {}}
@@ -60,6 +61,10 @@ type SSHBaseConfig struct {
 }
 
 type SSHPrivateKeyConfig struct {
+	*SSHBaseConfig
+}
+
+type SSHPasswordConfig struct {
 	*SSHBaseConfig
 }
 
