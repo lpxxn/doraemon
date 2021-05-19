@@ -44,6 +44,8 @@ const mascot1 = `
       ⠀⠀⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣤⣤⣤⣭⣭⣭⣭⣭⣥⣤⣤⣤⣴⣟⠁
 `
 
+const openConfigDir = "openConfigDir"
+
 var existCommand = map[string]struct{}{"exit": {}, ":q": {}}
 
 func main() {
@@ -52,35 +54,43 @@ func main() {
 	}
 	fmt.Println(mascot1)
 	for {
-		fmt.Println("Please select ssh name.")
-		sshName := prompt.Input(consolePrefix, sshCompleter)
+		fmt.Println("Please select command.")
+		cmdName := prompt.Input(consolePrefix, sshCompleter)
 		//fmt.Println("You selected " + sshName)
-		if _, ok := existCommand[sshName]; ok {
+		if _, ok := existCommand[cmdName]; ok {
 			fmt.Println("👋👋👋 bye ~")
 			return
 		}
-		sshConfig, err := config.SSHConfigByName(sshName)
-		if err != nil {
-			fmt.Println(err)
+		if openConfigDir == cmdName {
+			if err := config.OpenConfDir(); err != nil {
+				fmt.Println(err)
+			}
 			continue
 		}
-		client, err := utils.NewSSHClient(sshConfig)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		// Create Session
-		session, err := client.CreateSession()
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		// Start ssh shell
-		if err := client.Shell(session); err != nil {
+		if err := startSSHShell(cmdName); err != nil {
 			fmt.Println(err)
 		}
 	}
+}
+
+func startSSHShell(sshName string) error {
+	sshConfig, err := config.SSHConfigByName(sshName)
+	if err != nil {
+		return err
+	}
+	client, err := utils.NewSSHClient(sshConfig)
+	if err != nil {
+		return err
+
+	}
+	// Create Session
+	session, err := client.CreateSession()
+	if err != nil {
+		return err
+	}
+
+	// Start ssh shell
+	return client.Shell(session)
 }
 
 func runLoginCmd(cmd *cobra.Command, args []string) {
@@ -101,4 +111,12 @@ func setSSHSuggest() {
 			Description: item.Desc,
 		})
 	}
+	addOpenDirSuggest()
+}
+
+func addOpenDirSuggest() {
+	sshSuggest = append(sshSuggest, prompt.Suggest{
+		Text:        "openConfigDir",
+		Description: "open config directory",
+	})	
 }
