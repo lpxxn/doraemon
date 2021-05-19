@@ -104,8 +104,20 @@ func (s *sshInfo) ToSSHConfig() (utils.SSHConfig, error) {
 		}
 		sshConf.AuthMethods = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 		return sshConf, nil
+	} else if authMethod == utils.Password {
+		sshConf := &utils.SSHPasswordConfig{SSHBaseConfig: &utils.SSHBaseConfig{
+			MethodName:   authMethod,
+			URI:          s.URI,
+			User:         s.User,
+			AuthMethods:  []ssh.AuthMethod{ssh.Password(s.Passphrase)},
+			Timout:       s.Timout,
+			Passphrase:   s.Passphrase,
+			StartCommand: s.StartCommand,
+		},
+		}
+		return sshConf, nil
 	}
-	return nil, errors.New("ToSSHConfig error invalid authMethod")
+	return nil, errors.New("ToSSHConfig error invalid authMethod: " + string(authMethod))
 }
 
 func (s *sshInfo) HaveProxy() bool {
