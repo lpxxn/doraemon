@@ -22,13 +22,13 @@ func main() {
 	}
 
 
-	cmd := exec.Command("ssh", "cafetest1dev")
+	cmd := exec.Command("ls", "abc")
 	cmd.Env = append(os.Environ())
 	if err := cmd.Run(); err != nil {
 		fmt.Print(err)
 	}
 	fmt.Println(cmd.Wait())
-	if err := RunCmd("cafe_sandbox_test1"); err != nil {
+	if err := RunCmd("ls"); err != nil {
 		fmt.Print(err)
 	}
 }
