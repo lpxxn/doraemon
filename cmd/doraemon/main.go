@@ -61,13 +61,6 @@ func main() {
 	if err := app.Start(startCtx); err != nil {
 		log.Fatal(err)
 	}
-	//app.Run()
-	//fmt.Println("~~~")
-	//stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	//defer cancel()
-	//if err := app.Stop(stopCtx); err != nil {
-	//	log.Fatal(err)
-	//}
 }
 
 func RunSSHCommand(sshCompleter prompt.Completer) {
@@ -122,10 +115,6 @@ func getSSHCompleter(sshSuggest []prompt.Suggest) prompt.Completer {
 	}
 }
 
-//func sshCompleter(d prompt.Document) []prompt.Suggest {
-//	return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
-//}
-
 func setSSHSuggest(conf *config.AppConfig) []prompt.Suggest{
 	var sshSuggest = []prompt.Suggest{}
 	for _, item := range conf.SSHInfo {
@@ -134,12 +123,12 @@ func setSSHSuggest(conf *config.AppConfig) []prompt.Suggest{
 			Description: item.Desc,
 		})
 	}
-	addOpenDirSuggest(sshSuggest)
+	addOpenDirSuggest(&sshSuggest)
 	return sshSuggest
 }
 
-func addOpenDirSuggest(sshSuggest []prompt.Suggest) {
-	sshSuggest = append(sshSuggest, prompt.Suggest{
+func addOpenDirSuggest(sshSuggest *[]prompt.Suggest) {
+	*sshSuggest = append(*sshSuggest, prompt.Suggest{
 		Text:        "openConfigDir",
 		Description: "open config directory",
 	})
