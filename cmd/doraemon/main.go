@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/lpxxn/doraemon/config"
 	"github.com/lpxxn/doraemon/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/fx"
 )
 
 var loginCmd = &cobra.Command{
@@ -17,19 +21,10 @@ var loginCmd = &cobra.Command{
 	Run:     runLoginCmd,
 }
 
-func initConf() error {
-	if err := config.ParseConfig(); err != nil {
-		return err
-	}
-	// fmt.Println(*config.LoginConf)
-	// config.OpenConfDir()
-	setSSHSuggest()
-	return nil
-}
-
 // 👻 >
 //const consolePrefix = "⚡️>>> "
 const consolePrefix = "o((=ﾟェﾟ=))o > "
+
 //const consolePrefix = "🤪 >> "
 const mascot1 = `
       ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣴⣶⣶⣶⣶⣶⣶⣶⣶⣶⠶⣶⣤⣤⣀⠀⠀⠀⠀⠀⠀ 
@@ -48,11 +43,34 @@ const openConfigDir = "openConfigDir"
 
 var existCommand = map[string]struct{}{"exit": {}, ":q": {}}
 
+
+var sd fx.Shutdowner
+var lc fx.Lifecycle
 func main() {
-	if err := initConf(); err != nil {
-		panic(err)
-	}
+
 	fmt.Println(mascot1)
+	app := fx.New(fx.NopLogger,
+		fx.Provide(
+			config.ParseConfig,
+			setSSHSuggest,
+			getSSHCompleter),fx.Populate(&sd, &lc),
+		fx.Invoke(RunSSHCommand))
+
+	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	if err := app.Start(startCtx); err != nil {
+		log.Fatal(err)
+	}
+	//app.Run()
+	//fmt.Println("~~~")
+	//stopCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	//defer cancel()
+	//if err := app.Stop(stopCtx); err != nil {
+	//	log.Fatal(err)
+	//}
+}
+
+func RunSSHCommand(sshCompleter prompt.Completer) {
 	for {
 		fmt.Println("Please select command.")
 		cmdName := prompt.Input(consolePrefix, sshCompleter)
@@ -97,26 +115,32 @@ func runLoginCmd(cmd *cobra.Command, args []string) {
 	utils.SendMsg(true, "go ...", "login ~", utils.Yellow, true)
 }
 
-var sshSuggest []prompt.Suggest
 
-func sshCompleter(d prompt.Document) []prompt.Suggest {
-	return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
+func getSSHCompleter(sshSuggest []prompt.Suggest) prompt.Completer {
+	return func(d prompt.Document) []prompt.Suggest {
+		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
+	}
 }
 
-func setSSHSuggest() {
-	sshSuggest = sshSuggest[:0]
-	for _, item := range config.LoginConf.SSHInfo {
+//func sshCompleter(d prompt.Document) []prompt.Suggest {
+//	return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
+//}
+
+func setSSHSuggest(conf *config.AppConfig) []prompt.Suggest{
+	var sshSuggest = []prompt.Suggest{}
+	for _, item := range conf.SSHInfo {
 		sshSuggest = append(sshSuggest, prompt.Suggest{
 			Text:        item.Name,
 			Description: item.Desc,
 		})
 	}
-	addOpenDirSuggest()
+	addOpenDirSuggest(sshSuggest)
+	return sshSuggest
 }
 
-func addOpenDirSuggest() {
+func addOpenDirSuggest(sshSuggest []prompt.Suggest) {
 	sshSuggest = append(sshSuggest, prompt.Suggest{
 		Text:        "openConfigDir",
 		Description: "open config directory",
-	})	
+	})
 }

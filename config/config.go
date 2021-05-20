@@ -15,15 +15,15 @@ import (
 
 var ()
 
-type appConfig struct {
+type AppConfig struct {
 	SSHInfo    []*sshInfo   `toml:"sshInfo"`
 	LoginInfo  []*loginInfo `toml:"loginInfo"`
 	sshMapInfo map[string]*sshInfo
 }
 
-var LoginConf *appConfig
+var LoginConf *AppConfig
 
-func (a *appConfig) ConfigByName(name string) (*sshInfo, error) {
+func (a *AppConfig) ConfigByName(name string) (*sshInfo, error) {
 	for _, item := range a.SSHInfo {
 		if item.Name == name {
 			return item, nil
@@ -124,16 +124,16 @@ func (s *sshInfo) HaveProxy() bool {
 	return len(s.ProxySSHName) > 0
 }
 
-func ParseConfig() error {
+func ParseConfig() (*AppConfig, error) {
 	f, err := GetConfig()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if LoginConf == nil {
-		LoginConf = &appConfig{sshMapInfo: map[string]*sshInfo{}}
+		LoginConf = &AppConfig{sshMapInfo: map[string]*sshInfo{}}
 	}
 	if _, err = toml.DecodeReader(f, LoginConf); err != nil {
-		return err
+		return nil, err
 	}
 	// verify
 	var proxyName []string
@@ -148,10 +148,10 @@ func ParseConfig() error {
 	}
 	for _, item := range proxyName {
 		if _, ok := LoginConf.sshMapInfo[item]; !ok {
-			return sshConfigNotExist(item)
+			return nil, sshConfigNotExist(item)
 		}
 	}
-	return nil
+	return LoginConf, nil
 }
 
 func sshConfigNotExist(name string) error {
