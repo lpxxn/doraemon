@@ -1,10 +1,7 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"log"
-	"time"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/lpxxn/doraemon/config"
@@ -47,20 +44,13 @@ var existCommand = map[string]struct{}{"exit": {}, ":q": {}}
 var sd fx.Shutdowner
 var lc fx.Lifecycle
 func main() {
-
 	fmt.Println(mascot1)
-	app := fx.New(fx.NopLogger,
+	fx.New(fx.NopLogger,
 		fx.Provide(
 			config.ParseConfig,
 			setSSHSuggest,
 			getSSHCompleter),fx.Populate(&sd, &lc),
 		fx.Invoke(RunSSHCommand))
-
-	startCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	if err := app.Start(startCtx); err != nil {
-		log.Fatal(err)
-	}
 }
 
 func RunSSHCommand(sshCompleter prompt.Completer) {
