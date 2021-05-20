@@ -56,7 +56,7 @@ func main() {
 
 func RunSSHCommand(sshCompleter prompt.Completer) {
 	for {
-		utils.SendMsg(true, "Hi!", "Please select command.", utils.Yellow, true)
+		utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, true)
 		cmdName := prompt.Input(consolePrefix, sshCompleter)
 		//fmt.Println("You selected " + sshName)
 		if _, ok := existCommand[cmdName]; ok {
