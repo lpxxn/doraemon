@@ -40,9 +40,9 @@ const openConfigDir = "openConfigDir"
 
 var existCommand = map[string]struct{}{"exit": {}, ":q": {}, "\\q": {}}
 
-
 var sd fx.Shutdowner
 var lc fx.Lifecycle
+
 func main() {
 	fmt.Println(mascot1)
 	fmt.Println("type exit or :q or \\q to exit app")
@@ -50,7 +50,7 @@ func main() {
 		fx.Provide(
 			config.ParseConfig,
 			setSSHSuggest,
-			getSSHCompleter),fx.Populate(&sd, &lc),
+			getSSHCompleter), fx.Populate(&sd, &lc),
 		fx.Invoke(RunSSHCommand))
 }
 
@@ -58,7 +58,6 @@ func RunSSHCommand(sshCompleter prompt.Completer) {
 	for {
 		utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, true)
 		cmdName := prompt.Input(consolePrefix, sshCompleter)
-		//fmt.Println("You selected " + sshName)
 		if _, ok := existCommand[cmdName]; ok {
 			fmt.Println("👋👋👋 bye ~")
 			return
@@ -99,15 +98,14 @@ func runLoginCmd(cmd *cobra.Command, args []string) {
 	utils.SendMsg(true, "go ...", "login ~", utils.Yellow, true)
 }
 
-
 func getSSHCompleter(sshSuggest []prompt.Suggest) prompt.Completer {
 	return func(d prompt.Document) []prompt.Suggest {
 		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
 	}
 }
 
-func setSSHSuggest(conf *config.AppConfig) []prompt.Suggest{
-	var sshSuggest = []prompt.Suggest{}
+func setSSHSuggest(conf *config.AppConfig) []prompt.Suggest {
+	var sshSuggest []prompt.Suggest
 	for _, item := range conf.SSHInfo {
 		sshSuggest = append(sshSuggest, prompt.Suggest{
 			Text:        item.Name,
