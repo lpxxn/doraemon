@@ -48,10 +48,9 @@ func main() {
 	fmt.Println("type exit or :q or \\q to exit app")
 	fx.New(fx.NopLogger,
 		fx.Provide(
-			fx.Populate(&sd, &lc),
 			config.ParseConfig,
 			setSSHSuggest,
-			getSSHCompleter),
+			getSSHCompleter),fx.Populate(&sd, &lc),
 		fx.Invoke(RunSSHCommand))
 }
 
