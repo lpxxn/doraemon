@@ -56,6 +56,7 @@ func main() {
 }
 
 func RunSSHCommand(sshCompleter prompt.Completer) {
+exitCmd:
 	for {
 		//utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, true)
 		fmt.Println("Please select a command.")
@@ -68,7 +69,7 @@ func RunSSHCommand(sshCompleter prompt.Completer) {
 		}))
 		if _, ok := existCommand[cmdName]; ok {
 			fmt.Println("👋👋👋 bye ~")
-			return
+			break exitCmd
 		}
 		if openConfigDir == cmdName {
 			if err := config.OpenConfDir(); err != nil {
