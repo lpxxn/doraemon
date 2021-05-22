@@ -62,15 +62,30 @@ func TestDecode(t *testing.T) {
   url = "urltest"
   clientID = "ac"
   clientSecret = "dafd"
-  name = "haha"
-  pwd = "asdfasdf"
+  pwd = """asdfas"df"
+   dddd
+"""
   pwdUseMin = false
+  name = """h \
+a"ha hi"""
 `
 	conf := &AppConfig{}
 	if _, err := toml.Decode(src, conf); err != nil {
 		t.Fatal(err)
 	}
-	t.Log(conf)
+	t.Log(*conf.LoginInfo[0])
+	/*
+	有 \ 就没有\n
+	  pwd = """asdfas"df" \
+	   dddd
+	"""
+	// asdfas"df" dddd
+
+	没有 \ 就会有\n 换行
+	asdfas"df"
+	   dddd
+
+	*/
 }
 
 func TestOpenConfDir(t *testing.T) {
