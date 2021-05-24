@@ -18,13 +18,13 @@ type AuthMethod string
 
 const (
 	PublicKey AuthMethod = "publickey"
-	Password AuthMethod = "password"
+	Password  AuthMethod = "password"
 )
 
-var AuthMethodList map[AuthMethod]struct{} = map[AuthMethod]struct{}{PublicKey: {}}
+var AuthMethodMap map[AuthMethod]struct{} = map[AuthMethod]struct{}{PublicKey: {}, Password: {}}
 
 func VerifyAuthMethod(m AuthMethod) bool {
-	_, ok := AuthMethodList[m]
+	_, ok := AuthMethodMap[m]
 	return ok
 }
 
