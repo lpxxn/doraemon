@@ -7,6 +7,8 @@
 
 developing...
 
+![doraemon command](/doraemon.gif)
+
 ## config
 
 config directory `~/.doraemon`,the program will create the config file when first run it.
