@@ -44,7 +44,6 @@ if your publickey is encrypted you need `passphrase`
   authMethod = "password"
   uri = "127.0.0.1:222"
   user = "testuser"
-  startCommand = "pwd;"
   passphrase = "123"
   desc = "sandbox deploy server"
 ```
