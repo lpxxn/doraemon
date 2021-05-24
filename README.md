@@ -10,6 +10,16 @@ developing...
 
 ![doraemon command](/doraemon.gif)
 
+## install from code
+```
+mkdir -p $GOPATH/src/github.com/lpxxn/doraemon
+cd $GOPATH/src/github.com/lpxxn/doraemon
+git clone https://github.com/lpxxn/doraemon.git 
+cd cmd/doraemon
+export GO111MODULE=on
+make install
+```
+
 ## config
 
 config directory `~/.doraemon`,the program will create the config file when first run it.
