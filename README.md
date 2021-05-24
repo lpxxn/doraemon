@@ -23,8 +23,8 @@ config directory `~/.doraemon`,the program will create the config file when firs
   desc = "my sandbox host1"
 ```
 
-if your publickey is encrypted
-you need `passphrase`
+if your publickey is encrypted you need `passphrase`
+
 ```
 [[sshInfo]]
   name = "gateway"
@@ -47,4 +47,33 @@ you need `passphrase`
   startCommand = "pwd;"
   passphrase = "123"
   desc = "sandbox deploy server"
+```
+
+### proxy
+
+if you have proxy host
+
+add a proxy
+
+```
+[[sshInfo]]
+  name = "proxy"
+  authMethod = "publickey"
+  uri = "192.168.1.7:22"
+  user = "lipeng"
+  publicKeyPath = "/Users/abc/.ssh/my_test.pem"
+  desc = "proxy"
+```
+
+use `proxySSHName` to specify `proxy`
+
+```
+[[sshInfo]]
+  name = "my_sandbox1"
+  authMethod = "publickey"
+  uri = "192.2.0.8:22"
+  user = "lipeng"
+  publicKeyPath = "/Users/li/.ssh/test.pem"
+  proxySSHName = "proxy"
+  desc = "my sandbox host 1"
 ```

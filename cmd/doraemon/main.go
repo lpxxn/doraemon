@@ -58,8 +58,8 @@ func main() {
 func RunSSHCommand(sshCompleter prompt.Completer) {
 exitCmd:
 	for {
-		//utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, true)
-		fmt.Println("Please select a command.")
+		utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
+		//fmt.Println("Please select a command.")
 		cmdName := prompt.Input(consolePrefix, sshCompleter, prompt.OptionAddKeyBind(prompt.KeyBind{
 			Key: prompt.ControlC,
 			Fn: func(buffer *prompt.Buffer) {
