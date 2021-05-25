@@ -16,14 +16,11 @@ func TestGetConfig(t *testing.T) {
 }
 
 func TestWriteConf(t *testing.T) {
-	conf := &AppConfig{LoginInfo: []*loginInfo{
-		&loginInfo{
-			URL:          "urltest",
-			ClientID:     "ac",
-			ClientSecret: "dafd",
-			Name:         "haha",
-			Pwd:          "asdfasdf",
-			PwdUseMin:    false,
+	conf := &AppConfig{LoginInfo: []*CmdInfo{
+		&CmdInfo{
+			Name: "haha",
+			Cmd:  "ls -l;",
+			Desc: "ls data",
 		},
 	}, SSHInfo: []*sshInfo{&sshInfo{
 		Name:          "test1",
@@ -58,7 +55,7 @@ func TestDecode(t *testing.T) {
   publicKeyPath = "a/b/c"
   timout = 0
 
-[[loginInfo]]
+[[CmdInfo]]
   url = "urltest"
   clientID = "ac"
   clientSecret = "dafd"
@@ -75,15 +72,15 @@ a"ha hi"""
 	}
 	t.Log(*conf.LoginInfo[0])
 	/*
-	有 \ 就没有\n
-	  pwd = """asdfas"df" \
-	   dddd
-	"""
-	// asdfas"df" dddd
+		有 \ 就没有\n
+		  pwd = """asdfas"df" \
+		   dddd
+		"""
+		// asdfas"df" dddd
 
-	没有 \ 就会有\n 换行
-	asdfas"df"
-	   dddd
+		没有 \ 就会有\n 换行
+		asdfas"df"
+		   dddd
 
 	*/
 }

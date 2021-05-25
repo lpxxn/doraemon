@@ -16,8 +16,8 @@ import (
 var ()
 
 type AppConfig struct {
-	SSHInfo    []*sshInfo   `toml:"sshInfo"`
-	LoginInfo  []*loginInfo `toml:"loginInfo"`
+	SSHInfo    []*sshInfo `toml:"sshInfo"`
+	LoginInfo  []*CmdInfo `toml:"CmdInfo"`
 	sshMapInfo map[string]*sshInfo
 }
 
@@ -65,13 +65,10 @@ type sshInfo struct {
 	StartCommand  string        `toml:"startCommand"`
 }
 
-type loginInfo struct {
-	URL          string `toml:"url"`
-	ClientID     string `toml:"clientID"`
-	ClientSecret string `toml:"clientSecret"`
-	Name         string `toml:"name"`
-	Pwd          string `toml:"pwd"`
-	PwdUseMin    bool   `toml:"pwdUseMin"`
+type CmdInfo struct {
+	Name string `toml:"name"`
+	Cmd  string `toml:"cmd"`
+	Desc string `toml:"desc"`
 }
 
 func (s *sshInfo) ToSSHConfig() (utils.SSHConfig, error) {
