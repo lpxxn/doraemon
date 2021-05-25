@@ -34,3 +34,13 @@ func TestExecCommand(t *testing.T) {
 		})
 	}
 }
+
+func TestRunCmd1(t *testing.T) {
+	if err := RunCmd("ls -l; pwd;"); err != nil {
+		panic(err)
+	}
+
+	if err := RunCmd(`curl -X GET "http://www.baidu.com/$(date +%M)"`); err != nil {
+		panic(err)
+	}
+}
