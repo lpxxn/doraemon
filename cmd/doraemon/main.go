@@ -13,10 +13,10 @@ import (
 )
 
 var loginCmd = &cobra.Command{
-	Use:     "login",
-	Aliases: []string{"mc"},
-	Short:   "login",
-	Long:    "\n oauth login.",
+	Use:     "command",
+	Aliases: []string{"cmd"},
+	Short:   "cmd",
+	Long:    "\n command .",
 	Run:     runLoginCmd,
 }
 
