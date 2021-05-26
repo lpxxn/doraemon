@@ -8,14 +8,15 @@ import (
 	"github.com/lpxxn/doraemon/config"
 	"github.com/lpxxn/doraemon/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/dig"
 	"go.uber.org/fx"
 )
 
 var loginCmd = &cobra.Command{
-	Use:     "login",
-	Aliases: []string{"mc"},
-	Short:   "login",
-	Long:    "\n oauth login.",
+	Use:     "command",
+	Aliases: []string{"cmd"},
+	Short:   "cmd",
+	Long:    "\n command .",
 	Run:     runLoginCmd,
 }
 
@@ -50,17 +51,26 @@ func main() {
 	fx.New(fx.NopLogger,
 		fx.Provide(
 			config.ParseConfig,
-			setSSHSuggest,
-			getSSHCompleter), fx.Populate(&sd, &lc),
+			setSSHSuggest),
+		fx.Provide(fx.Annotated{
+			Name:   "sshCompleter",
+			Target: getSSHCompleter,
+		}),
+		fx.Populate(&sd, &lc),
 		fx.Invoke(RunSSHCommand))
 }
 
-func RunSSHCommand(sshCompleter prompt.Completer) {
+type sshCmdParam struct {
+	dig.In
+	Completer prompt.Completer `name:"sshCompleter"`
+}
+
+func RunSSHCommand(param sshCmdParam) {
 exitCmd:
 	for {
 		utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
 		//fmt.Println("Please select a command.")
-		cmdName := prompt.Input(consolePrefix, sshCompleter, prompt.OptionAddKeyBind(prompt.KeyBind{
+		cmdName := prompt.Input(consolePrefix, param.Completer, prompt.OptionAddKeyBind(prompt.KeyBind{
 			Key: prompt.ControlC,
 			Fn: func(buffer *prompt.Buffer) {
 				fmt.Println("👋👋👋 bye ~")

@@ -16,7 +16,7 @@ func TestGetConfig(t *testing.T) {
 }
 
 func TestWriteConf(t *testing.T) {
-	conf := &AppConfig{LoginInfo: []*CmdInfo{
+	conf := &AppConfig{cmdInfo: []*CmdInfo{
 		&CmdInfo{
 			Name: "haha",
 			Cmd:  "ls -l;",
@@ -70,7 +70,7 @@ a"ha hi"""
 	if _, err := toml.Decode(src, conf); err != nil {
 		t.Fatal(err)
 	}
-	t.Log(*conf.LoginInfo[0])
+	t.Log(*conf.cmdInfo[0])
 	/*
 		有 \ 就没有\n
 		  pwd = """asdfas"df" \

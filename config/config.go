@@ -17,7 +17,7 @@ var ()
 
 type AppConfig struct {
 	SSHInfo    []*sshInfo `toml:"sshInfo"`
-	LoginInfo  []*CmdInfo `toml:"CmdInfo"`
+	CmdInfo    []*CmdInfo `toml:"CmdInfo"`
 	sshMapInfo map[string]*sshInfo
 }
 
