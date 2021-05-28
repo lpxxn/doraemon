@@ -66,48 +66,6 @@ type sshCmdParam struct {
 	Completer prompt.Completer `name:"sshCompleter"`
 }
 
-type ICommand interface {
-	Exec() error
-}
-
-type sshPromptInfo struct {
-	Completer prompt.Completer `name:"sshCompleter"`
-}
-
-var sshPrompt *sshPromptInfo
-
-func NewSSHPrompt(param sshCmdParam) {
-	sshPrompt = &sshPromptInfo{Completer: param.Completer}
-}
-
-func (s *sshPromptInfo) Exec() error {
-exitCmd:
-	for {
-		utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
-		//fmt.Println("Please select a command.")
-		cmdName := prompt.Input(consolePrefix, s.Completer, prompt.OptionAddKeyBind(prompt.KeyBind{
-			Key: prompt.ControlC,
-			Fn: func(buffer *prompt.Buffer) {
-				fmt.Println("👋👋👋 bye ~")
-				os.Exit(0)
-			},
-		}))
-		if _, ok := existCommand[cmdName]; ok {
-			fmt.Println("👋👋👋 bye ~")
-			break exitCmd
-		}
-		if openConfigDir == cmdName {
-			if err := config.OpenConfDir(); err != nil {
-				fmt.Println(err)
-			}
-			continue
-		}
-		if err := startSSHShell(cmdName); err != nil {
-			fmt.Println(err)
-		}
-	}
-	return nil
-}
 
 func RunSSHCommand(param sshCmdParam) {
 exitCmd:
