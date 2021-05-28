@@ -16,8 +16,22 @@ func main() {
 }
 
 type ICommand interface {
+	Desc() string
 	CmdName() string
 	Exec() error
+}
+
+type app struct {
+	currentCmd ICommand
+	cmds       map[string]ICommand
+}
+
+func (a *app) AddCmd(c ICommand) {
+	a.cmds[c.CmdName()] = c
+}
+
+func (a *app) ChangeCurrentCmd(name string) {
+	a.currentCmd = a.cmds[name]
 }
 
 type sshPromptInfo struct {
@@ -33,11 +47,15 @@ type sshCmdParam struct {
 }
 
 func NewSSHPrompt(param sshCmdParam) {
-	sshPrompt = &sshPromptInfo{Completer: param.Completer, cmdName: "sshCmd"}
+	sshPrompt = &sshPromptInfo{Completer: param.Completer, cmdName: "servCMD"}
 }
 
 func (s *sshPromptInfo) CmdName() string {
 	return s.cmdName
+}
+
+func (s *sshPromptInfo) Desc() string {
+	return "ssh services manager"
 }
 
 func (s *sshPromptInfo) Exec() error {
