@@ -63,10 +63,11 @@ func main() {
 		fx.Populate(&sd, &lc),
 		fx.Invoke(customCmd))
 	if err := app.Start(context.Background()); err != nil {
-		panic(err)
+		fmt.Errorf("start err: %#v", err)
 	}
-	app.Stop(context.Background())
-	fmt.Println("stop")
+	if err := app.Stop(context.Background()); err != nil {
+		fmt.Errorf("stop err: %#v", err)
+	}
 }
 
 type cmdParam struct {
@@ -119,15 +120,20 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 	}
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			defer rootCmd.Execute()
+			// todo 不是特别好。
+			if err := rootCmd.Execute(); err != nil {
+				return err
+			}
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 			// https://github.com/c-bata/go-prompt/issues/233
 			rawModeOff := exec.Command("/bin/stty", "-raw", "echo")
+			//rawModeOff := exec.Command("/bin/stty", "sane")
 			rawModeOff.Stdin = os.Stdin
 			_ = rawModeOff.Run()
 			rawModeOff.Wait()
+
 			fmt.Println("life stop...")
 			return nil
 		},
