@@ -16,9 +16,10 @@ import (
 var ()
 
 type AppConfig struct {
-	SSHInfo    []*sshInfo `toml:"sshInfo"`
-	CmdInfo    []*CmdInfo `toml:"CmdInfo"`
+	SSHInfo    sshInfoList `toml:"sshInfo"`
+	CmdInfo    cmdInfoList `toml:"CmdInfo"`
 	sshMapInfo map[string]*sshInfo
+	cmdMapInfo map[string]*cmdInfo
 }
 
 var LoginConf *AppConfig
@@ -35,7 +36,7 @@ func (a *AppConfig) ConfigByName(name string) (*sshInfo, error) {
 func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
 	item, ok := LoginConf.sshMapInfo[sshName]
 	if !ok {
-		return nil, sshConfigNotExist(sshName)
+		return nil, configNotExist(sshName)
 	}
 	sshConfig, err := item.ToSSHConfig()
 	if err != nil {
@@ -52,6 +53,53 @@ func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
 	return sshConfig, nil
 }
 
+func CustomConfigByName(name string) (*cmdInfo, error) {
+	item, ok := LoginConf.cmdMapInfo[name]
+	if !ok {
+		return nil, configNotExist(name)
+	}
+	return item, nil
+}
+
+type Info interface {
+	GetName() string
+	GetDesc() string
+}
+
+type InfoIterator interface {
+	HasNext() bool
+	Next() Info
+}
+type InfoCollection interface {
+	GetIterator() InfoIterator
+}
+
+type sshInfoList []*sshInfo
+type sshIterator struct {
+	data  []*sshInfo
+	index int
+}
+
+func (s sshIterator) HasNext() bool {
+	return len(s.data) > s.index
+}
+
+func (s *sshIterator) Next() Info {
+	if s.HasNext() {
+		v := s.data[s.index]
+		s.index++
+		return v
+	}
+	return nil
+}
+
+func (s sshInfoList) GetIterator() InfoIterator {
+	return &sshIterator{
+		data:  s,
+		index: 0,
+	}
+}
+
 type sshInfo struct {
 	Name          string        `toml:"name"`
 	AuthMethod    string        `toml:"authMethod"`
@@ -65,10 +113,53 @@ type sshInfo struct {
 	StartCommand  string        `toml:"startCommand"`
 }
 
-type CmdInfo struct {
+func (s *sshInfo) GetName() string {
+	return s.Name
+}
+
+func (s *sshInfo) GetDesc() string {
+	return s.Desc
+}
+
+type cmdInfo struct {
 	Name string `toml:"name"`
 	Cmd  string `toml:"cmd"`
 	Desc string `toml:"desc"`
+}
+
+func (c cmdInfo) GetName() string {
+	return c.Name
+}
+
+func (c cmdInfo) GetDesc() string {
+	return c.Desc
+}
+
+type cmdInfoList []*cmdInfo
+
+func (c cmdInfoList) GetIterator() InfoIterator {
+	return &cmdIterator{
+		data:  c,
+		index: 0,
+	}
+}
+
+type cmdIterator struct {
+	data  cmdInfoList
+	index int
+}
+
+func (c cmdIterator) HasNext() bool {
+	return len(c.data) > c.index
+}
+
+func (c *cmdIterator) Next() Info {
+	if c.HasNext() {
+		v := c.data[c.index]
+		c.index++
+		return v
+	}
+	return nil
 }
 
 func (s *sshInfo) ToSSHConfig() (utils.SSHConfig, error) {
@@ -127,7 +218,7 @@ func ParseConfig() (*AppConfig, error) {
 		return nil, err
 	}
 	if LoginConf == nil {
-		LoginConf = &AppConfig{sshMapInfo: map[string]*sshInfo{}}
+		LoginConf = &AppConfig{sshMapInfo: map[string]*sshInfo{}, cmdMapInfo: map[string]*cmdInfo{}}
 	}
 	if _, err = toml.DecodeReader(f, LoginConf); err != nil {
 		return nil, err
@@ -145,12 +236,15 @@ func ParseConfig() (*AppConfig, error) {
 	}
 	for _, item := range proxyName {
 		if _, ok := LoginConf.sshMapInfo[item]; !ok {
-			return nil, sshConfigNotExist(item)
+			return nil, configNotExist(item)
 		}
+	}
+	for _, item := range LoginConf.CmdInfo {
+		LoginConf.cmdMapInfo[item.Name] = item
 	}
 	return LoginConf, nil
 }
 
-func sshConfigNotExist(name string) error {
-	return errors.New(fmt.Sprintf("ssh [%s] info not in config", name))
+func configNotExist(name string) error {
+	return errors.New(fmt.Sprintf("config [%s] info not in config", name))
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/lpxxn/doraemon/config"
@@ -13,14 +14,6 @@ import (
 	"go.uber.org/dig"
 	"go.uber.org/fx"
 )
-
-var loginCmd = &cobra.Command{
-	Use:     "command",
-	Aliases: []string{"cmd"},
-	Short:   "cmd",
-	Long:    "\n command .",
-	Run:     runLoginCmd,
-}
 
 // 👻 >
 //const consolePrefix = "⚡️>>> "
@@ -60,7 +53,6 @@ func main() {
 			Name:   "customCmdCompleter",
 			Target: getCustomCMDCompleter,
 		}),
-		//fx.Provide(NewSSHPrompt),
 		fx.Provide(RootCMD),
 		fx.Populate(&sd, &lc),
 		fx.Invoke(customCmd))
@@ -88,26 +80,15 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 		exitCmd:
 			for {
 				utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
-				//fmt.Println("Please select a command.")
 				cmdName := prompt.Input(consolePrefix, param.SSHCompleter)
-				/*
-					, prompt.OptionAddKeyBind(prompt.KeyBind{
-							Key: prompt.ControlC,
-							Fn: func(buffer *prompt.Buffer) {
-								fmt.Println("👋👋👋 bye ~")
-								sd.Shutdown()
-								//os.Exit(0)
-							},
-						})
-				*/
-				if _, ok := existCommand[cmdName]; ok {
-					fmt.Println("👋👋👋 bye ~")
+				if strings.Trim(cmdName, " ") == "" {
+					continue
+				}
+				runed, needExist := runGlobalCmd(cmdName)
+				if runed && needExist {
 					break exitCmd
 				}
-				if openConfigDir == cmdName {
-					if err := config.OpenConfDir(); err != nil {
-						fmt.Println(err)
-					}
+				if runed {
 					continue
 				}
 				if err := startSSHShell(cmdName); err != nil {
@@ -132,13 +113,7 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			// https://github.com/c-bata/go-prompt/issues/233
-			rawModeOff := exec.Command("/bin/stty", "-raw", "echo")
-			//rawModeOff := exec.Command("/bin/stty", "sane")
-			rawModeOff.Stdin = os.Stdin
-			_ = rawModeOff.Run()
-			rawModeOff.Wait()
-
+			handleStty()
 			// fmt.Println("life stop...")
 			return nil
 		},
@@ -146,16 +121,52 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 	return rootCmd
 }
 
+func runGlobalCmd(cmdName string) (runed bool, needExist bool) {
+	if _, ok := existCommand[cmdName]; ok {
+		fmt.Println("👋👋👋 bye ~")
+		return true, true
+	}
+	if openConfigDir == cmdName {
+		if err := config.OpenConfDir(); err != nil {
+			fmt.Println(err)
+		}
+		return true, false
+	}
+	return false, false
+}
+
+func handleStty() {
+	// https://github.com/c-bata/go-prompt/issues/233
+	rawModeOff := exec.Command("/bin/stty", "-raw", "echo")
+	//rawModeOff := exec.Command("/bin/stty", "sane")
+	rawModeOff.Stdin = os.Stdin
+	_ = rawModeOff.Run()
+	rawModeOff.Wait()
+}
+
 func customCmd(rootCmd *cobra.Command, param cmdParam) {
 	cmd := &cobra.Command{
 		Use:   "cmd",
 		Short: "custom cmd",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("---custom cmd---")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
 			for {
 				cmdName := prompt.Input(consolePrefix, param.CmdCompleter)
-				fmt.Println(cmdName)
+				if strings.Trim(cmdName, " ") == "" {
+					continue
+				}
+				runed, needExist := runGlobalCmd(cmdName)
+				if runed && needExist {
+					break
+				}
+				if runed {
+					continue
+				}
+				if err := runCustomCmd(cmdName); err != nil {
+					fmt.Println(err)
+				}
 			}
+			return sd.Shutdown()
 		},
 	}
 	rootCmd.AddCommand(cmd)
@@ -181,36 +192,40 @@ func startSSHShell(sshName string) error {
 	return client.Shell(session)
 }
 
-func runLoginCmd(cmd *cobra.Command, args []string) {
-	utils.SendMsg(true, "go ...", "login ~", utils.Yellow, true)
+func runCustomCmd(cmdName string) error {
+	item, err := config.CustomConfigByName(cmdName)
+	if err != nil {
+		return err
+	}
+	return utils.RunCmd(item.Cmd)
 }
 
 func getSSHCompleter(conf *config.AppConfig) prompt.Completer {
-	var sshSuggest []prompt.Suggest
-	for _, item := range conf.SSHInfo {
-		sshSuggest = append(sshSuggest, prompt.Suggest{
-			Text:        item.Name,
-			Description: item.Desc,
-		})
-	}
-	addOpenDirSuggest(&sshSuggest)
+	sshSuggest := getSuggest(conf.SSHInfo)
 	return func(d prompt.Document) []prompt.Suggest {
 		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
 	}
 }
 
 func getCustomCMDCompleter(conf *config.AppConfig) prompt.Completer {
-	var sshSuggest []prompt.Suggest
-	for _, item := range conf.CmdInfo {
-		sshSuggest = append(sshSuggest, prompt.Suggest{
-			Text:        item.Name,
-			Description: item.Desc,
-		})
-	}
-	addOpenDirSuggest(&sshSuggest)
+	sshSuggest := getSuggest(conf.CmdInfo)
 	return func(d prompt.Document) []prompt.Suggest {
 		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
 	}
+}
+
+func getSuggest(c config.InfoCollection) []prompt.Suggest {
+	var sshSuggest []prompt.Suggest
+
+	for iterator := c.GetIterator(); iterator.HasNext(); {
+		item := iterator.Next()
+		sshSuggest = append(sshSuggest, prompt.Suggest{
+			Text:        item.GetName(),
+			Description: item.GetDesc(),
+		})
+	}
+	addOpenDirSuggest(&sshSuggest)
+	return sshSuggest
 }
 
 func addOpenDirSuggest(sshSuggest *[]prompt.Suggest) {
@@ -219,7 +234,6 @@ func addOpenDirSuggest(sshSuggest *[]prompt.Suggest) {
 		Description: "open config directory",
 	})
 }
-
 
 func RunSSHCommand(param cmdParam) {
 exitCmd:
@@ -248,4 +262,3 @@ exitCmd:
 		}
 	}
 }
-
