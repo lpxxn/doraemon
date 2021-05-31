@@ -16,8 +16,8 @@ func TestGetConfig(t *testing.T) {
 }
 
 func TestWriteConf(t *testing.T) {
-	conf := &AppConfig{CmdInfo: []*CmdInfo{
-		&CmdInfo{
+	conf := &AppConfig{CmdInfo: []*cmdInfo{
+		&cmdInfo{
 			Name: "haha",
 			Cmd:  "ls -l;",
 			Desc: "ls data",
