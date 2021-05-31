@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -48,7 +49,7 @@ var lc fx.Lifecycle
 func main() {
 	fmt.Println(mascot1)
 	fmt.Println("type exit or :q or \\q to exit app")
-	fx.New(fx.NopLogger,
+	app := fx.New(fx.NopLogger,
 		fx.Provide(
 			config.ParseConfig,
 			setSSHSuggest),
@@ -57,17 +58,90 @@ func main() {
 			Target: getSSHCompleter,
 		}),
 		//fx.Provide(NewSSHPrompt),
+		fx.Provide(RootCMD),
 		fx.Populate(&sd, &lc),
-		fx.Invoke(RunSSHCommand))
+		fx.Invoke(customCmd))
+	if err := app.Start(context.Background()); err != nil {
+		panic(err)
+	}
+	<-app.Done()
+	fmt.Println("done")
+	//app.Stop(context.Background())
 }
 
-type sshCmdParam struct {
+type cmdParam struct {
 	dig.In
 	Completer prompt.Completer `name:"sshCompleter"`
 }
 
+func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
+	rootCmd := &cobra.Command{
+		Use:   "doraemon",
+		Short: "doraemon tools",
+		Long:  `ssh manager and .....`,
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-func RunSSHCommand(param sshCmdParam) {
+		exitCmd:
+			for {
+				utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
+				//fmt.Println("Please select a command.")
+				cmdName := prompt.Input(consolePrefix, param.Completer)
+				/*
+					, prompt.OptionAddKeyBind(prompt.KeyBind{
+							Key: prompt.ControlC,
+							Fn: func(buffer *prompt.Buffer) {
+								fmt.Println("👋👋👋 bye ~")
+								sd.Shutdown()
+								//os.Exit(0)
+							},
+						})
+				*/
+				if _, ok := existCommand[cmdName]; ok {
+					fmt.Println("👋👋👋 bye ~")
+					break exitCmd
+				}
+				if openConfigDir == cmdName {
+					if err := config.OpenConfDir(); err != nil {
+						fmt.Println(err)
+					}
+					continue
+				}
+				if err := startSSHShell(cmdName); err != nil {
+					fmt.Println(err)
+				}
+			}
+			if err := sd.Shutdown(); err != nil {
+				fmt.Println("sd shutdown error", err)
+			}
+			fmt.Println("-adfasdf")
+			return nil
+		},
+	}
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			defer rootCmd.Execute()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return nil
+		},
+	})
+	return rootCmd
+}
+
+func customCmd(rootCmd *cobra.Command) {
+	cmd := &cobra.Command{
+		Use:   "cmd",
+		Short: "custom cmd",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("aaaa-----")
+			fmt.Println(*cmd)
+		},
+	}
+	rootCmd.AddCommand(cmd)
+}
+
+func RunSSHCommand(param cmdParam) {
 exitCmd:
 	for {
 		utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
