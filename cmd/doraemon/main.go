@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/c-bata/go-prompt"
 	"github.com/lpxxn/doraemon/config"
@@ -64,9 +65,8 @@ func main() {
 	if err := app.Start(context.Background()); err != nil {
 		panic(err)
 	}
-	<-app.Done()
-	fmt.Println("done")
-	//app.Stop(context.Background())
+	app.Stop(context.Background())
+	fmt.Println("stop")
 }
 
 type cmdParam struct {
@@ -113,7 +113,7 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 			if err := sd.Shutdown(); err != nil {
 				fmt.Println("sd shutdown error", err)
 			}
-			fmt.Println("-adfasdf")
+			fmt.Println("stop ssh command")
 			return nil
 		},
 	}
@@ -123,6 +123,12 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
+			// https://github.com/c-bata/go-prompt/issues/233
+			rawModeOff := exec.Command("/bin/stty", "-raw", "echo")
+			rawModeOff.Stdin = os.Stdin
+			_ = rawModeOff.Run()
+			rawModeOff.Wait()
+			fmt.Println("life stop...")
 			return nil
 		},
 	})
