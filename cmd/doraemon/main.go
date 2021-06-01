@@ -84,11 +84,11 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 				if strings.Trim(cmdName, " ") == "" {
 					continue
 				}
-				runed, needExist := runGlobalCmd(cmdName)
-				if runed && needExist {
+				ran, needExist := runGlobalCmd(cmdName)
+				if ran && needExist {
 					break exitCmd
 				}
-				if runed {
+				if ran {
 					continue
 				}
 				if err := startSSHShell(cmdName); err != nil {
@@ -121,7 +121,7 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 	return rootCmd
 }
 
-func runGlobalCmd(cmdName string) (runed bool, needExist bool) {
+func runGlobalCmd(cmdName string) (ran bool, needExist bool) {
 	if _, ok := existCommand[cmdName]; ok {
 		fmt.Println("👋👋👋 bye ~")
 		return true, true
@@ -155,11 +155,11 @@ func customCmd(rootCmd *cobra.Command, param cmdParam) {
 				if strings.Trim(cmdName, " ") == "" {
 					continue
 				}
-				runed, needExist := runGlobalCmd(cmdName)
-				if runed && needExist {
+				ran, needExist := runGlobalCmd(cmdName)
+				if ran && needExist {
 					break
 				}
-				if runed {
+				if ran {
 					continue
 				}
 				if err := runCustomCmd(cmdName); err != nil {
