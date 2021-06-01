@@ -22,7 +22,7 @@ type AppConfig struct {
 	cmdMapInfo map[string]*cmdInfo
 }
 
-var LoginConf *AppConfig
+var AppConf *AppConfig
 
 func (a *AppConfig) ConfigByName(name string) (*sshInfo, error) {
 	for _, item := range a.SSHInfo {
@@ -34,7 +34,7 @@ func (a *AppConfig) ConfigByName(name string) (*sshInfo, error) {
 }
 
 func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
-	item, ok := LoginConf.sshMapInfo[sshName]
+	item, ok := AppConf.sshMapInfo[sshName]
 	if !ok {
 		return nil, configNotExist(sshName)
 	}
@@ -45,7 +45,7 @@ func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
 	if !item.HaveProxy() {
 		return sshConfig, nil
 	}
-	proxyConfig, err := LoginConf.sshMapInfo[item.ProxySSHName].ToSSHConfig()
+	proxyConfig, err := AppConf.sshMapInfo[item.ProxySSHName].ToSSHConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
 }
 
 func CustomConfigByName(name string) (*cmdInfo, error) {
-	item, ok := LoginConf.cmdMapInfo[name]
+	item, ok := AppConf.cmdMapInfo[name]
 	if !ok {
 		return nil, configNotExist(name)
 	}
@@ -217,32 +217,32 @@ func ParseConfig() (*AppConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	if LoginConf == nil {
-		LoginConf = &AppConfig{sshMapInfo: map[string]*sshInfo{}, cmdMapInfo: map[string]*cmdInfo{}}
+	if AppConf == nil {
+		AppConf = &AppConfig{sshMapInfo: map[string]*sshInfo{}, cmdMapInfo: map[string]*cmdInfo{}}
 	}
-	if _, err = toml.DecodeReader(f, LoginConf); err != nil {
+	if _, err = toml.DecodeReader(f, AppConf); err != nil {
 		return nil, err
 	}
 	// verify
 	var proxyName []string
-	for _, item := range LoginConf.SSHInfo {
-		if _, ok := LoginConf.sshMapInfo[item.Name]; ok {
+	for _, item := range AppConf.SSHInfo {
+		if _, ok := AppConf.sshMapInfo[item.Name]; ok {
 			continue
 		}
-		LoginConf.sshMapInfo[item.Name] = item
+		AppConf.sshMapInfo[item.Name] = item
 		if item.HaveProxy() {
 			proxyName = append(proxyName, item.Name)
 		}
 	}
 	for _, item := range proxyName {
-		if _, ok := LoginConf.sshMapInfo[item]; !ok {
+		if _, ok := AppConf.sshMapInfo[item]; !ok {
 			return nil, configNotExist(item)
 		}
 	}
-	for _, item := range LoginConf.CmdInfo {
-		LoginConf.cmdMapInfo[item.Name] = item
+	for _, item := range AppConf.CmdInfo {
+		AppConf.cmdMapInfo[item.Name] = item
 	}
-	return LoginConf, nil
+	return AppConf, nil
 }
 
 func configNotExist(name string) error {
