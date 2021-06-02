@@ -37,8 +37,11 @@ const openConfigDir = "openConfigDir"
 
 var existCommand = map[string]struct{}{"exit": {}, ":q": {}, "\\q": {}}
 
-var sd fx.Shutdowner
-var lc fx.Lifecycle
+var (
+	sd      fx.Shutdowner
+	lc      fx.Lifecycle
+	rootCmd *cobra.Command
+)
 
 func main() {
 	fmt.Println(mascot1)
@@ -59,9 +62,13 @@ func main() {
 	if err := app.Start(context.Background()); err != nil {
 		fmt.Printf("start err: %#v", err)
 	}
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Errorf("start err: %#v", err)
+	}
 	if err := app.Stop(context.Background()); err != nil {
 		fmt.Errorf("stop err: %#v", err)
 	}
+	utils.SendMsg(false, "bye ~", "👋👋👋 ", utils.Yellow, true)
 }
 
 type cmdParam struct {
@@ -71,7 +78,7 @@ type cmdParam struct {
 }
 
 func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
-	rootCmd := &cobra.Command{
+	rootCmd = &cobra.Command{
 		Use:   "doraemon",
 		Short: "doraemon tools",
 		Long:  `ssh manager and .....`,
@@ -93,6 +100,8 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 				}
 				if err := startSSHShell(cmdName); err != nil {
 					fmt.Println(err)
+				} else {
+					break exitCmd
 				}
 			}
 			if err := sd.Shutdown(); err != nil {
@@ -104,12 +113,6 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 	}
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			defer func() {
-				// todo 不是特别好。
-				if err := rootCmd.Execute(); err != nil {
-					fmt.Errorf("start err: %#v", err)
-				}
-			}()
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
@@ -123,7 +126,6 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 
 func runGlobalCmd(cmdName string) (ran bool, needExist bool) {
 	if _, ok := existCommand[cmdName]; ok {
-		fmt.Println("👋👋👋 bye ~")
 		return true, true
 	}
 	if openConfigDir == cmdName {
