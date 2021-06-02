@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,7 +12,9 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-var ()
+var (
+	ConfigNotExistErr = errors.New("config not exist")
+)
 
 type AppConfig struct {
 	SSHInfo    sshInfoList `toml:"sshInfo"`
@@ -36,7 +37,7 @@ func (a *AppConfig) ConfigByName(name string) (*sshInfo, error) {
 func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
 	item, ok := AppConf.sshMapInfo[sshName]
 	if !ok {
-		return nil, configNotExist(sshName)
+		return nil, configNotExist()
 	}
 	sshConfig, err := item.ToSSHConfig()
 	if err != nil {
@@ -56,7 +57,7 @@ func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
 func CustomConfigByName(name string) (*cmdInfo, error) {
 	item, ok := AppConf.cmdMapInfo[name]
 	if !ok {
-		return nil, configNotExist(name)
+		return nil, configNotExist()
 	}
 	return item, nil
 }
@@ -236,7 +237,7 @@ func ParseConfig() (*AppConfig, error) {
 	}
 	for _, item := range proxyName {
 		if _, ok := AppConf.sshMapInfo[item]; !ok {
-			return nil, configNotExist(item)
+			return nil, configNotExist()
 		}
 	}
 	for _, item := range AppConf.CmdInfo {
@@ -245,6 +246,6 @@ func ParseConfig() (*AppConfig, error) {
 	return AppConf, nil
 }
 
-func configNotExist(name string) error {
-	return errors.New(fmt.Sprintf("config [%s] info not in config", name))
+func configNotExist() error {
+	return ConfigNotExistErr
 }
