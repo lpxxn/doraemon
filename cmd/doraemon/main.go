@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
@@ -107,7 +106,6 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 			if err := sd.Shutdown(); err != nil {
 				fmt.Println("sd shutdown error", err)
 			}
-			// fmt.Println("stop ssh command")
 			return nil
 		},
 	}
@@ -116,8 +114,7 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			handleStty()
-			// fmt.Println("life stop...")
+			utils.SetSttySane()
 			return nil
 		},
 	})
@@ -135,15 +132,6 @@ func runGlobalCmd(cmdName string) (ran bool, needExist bool) {
 		return true, false
 	}
 	return false, false
-}
-
-func handleStty() {
-	// https://github.com/c-bata/go-prompt/issues/233
-	rawModeOff := exec.Command("/bin/stty", "-raw", "echo")
-	//rawModeOff := exec.Command("/bin/stty", "sane")
-	rawModeOff.Stdin = os.Stdin
-	_ = rawModeOff.Run()
-	rawModeOff.Wait()
 }
 
 func customCmd(rootCmd *cobra.Command, param cmdParam) {
@@ -203,20 +191,14 @@ func runCustomCmd(cmdName string) error {
 }
 
 func getSSHCompleter(conf *config.AppConfig) prompt.Completer {
-	sshSuggest := getSuggest(conf.SSHInfo)
-	return func(d prompt.Document) []prompt.Suggest {
-		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
-	}
+	return getCompleter(conf.SSHInfo)
 }
 
 func getCustomCMDCompleter(conf *config.AppConfig) prompt.Completer {
-	sshSuggest := getSuggest(conf.CmdInfo)
-	return func(d prompt.Document) []prompt.Suggest {
-		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
-	}
+	return getCompleter(conf.CmdInfo)
 }
 
-func getSuggest(c config.InfoCollection) []prompt.Suggest {
+func getCompleter(c config.InfoCollection) prompt.Completer {
 	var sshSuggest []prompt.Suggest
 
 	for iterator := c.GetIterator(); iterator.HasNext(); {
@@ -226,15 +208,13 @@ func getSuggest(c config.InfoCollection) []prompt.Suggest {
 			Description: item.GetDesc(),
 		})
 	}
-	addOpenDirSuggest(&sshSuggest)
-	return sshSuggest
-}
-
-func addOpenDirSuggest(sshSuggest *[]prompt.Suggest) {
-	*sshSuggest = append(*sshSuggest, prompt.Suggest{
+	sshSuggest = append(sshSuggest, prompt.Suggest{
 		Text:        "openConfigDir",
 		Description: "open config directory",
 	})
+	return func(d prompt.Document) []prompt.Suggest {
+		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
+	}
 }
 
 func RunSSHCommand(param cmdParam) {

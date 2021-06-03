@@ -6,9 +6,6 @@
 </p>
 
 developing...
-# SSH Server management
-
-![doraemon command](/doraemon.gif)
 
 ## install from code
 ```
@@ -19,6 +16,10 @@ cd cmd/doraemon
 export GO111MODULE=on
 make install
 ```
+
+# SSH Server management
+
+![doraemon command](/doraemon.gif)
 
 ## config
 
@@ -89,3 +90,5 @@ use `proxySSHName` to specify `proxy`
   proxySSHName = "proxy"
   desc = "my sandbox host 1"
 ```
+
+# custom command
