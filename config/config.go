@@ -13,12 +13,12 @@ import (
 )
 
 var (
-	ConfigNotExistErr = errors.New("config not exist")
+	NotExistErr = errors.New("config not exist")
 )
 
 type AppConfig struct {
 	SSHInfo    sshInfoList `toml:"sshInfo"`
-	CmdInfo    cmdInfoList `toml:"CmdInfo"`
+	CmdInfo    cmdInfoList `toml:"cmdInfo"`
 	sshMapInfo map[string]*sshInfo
 	cmdMapInfo map[string]*cmdInfo
 }
@@ -247,5 +247,5 @@ func ParseConfig() (*AppConfig, error) {
 }
 
 func configNotExist() error {
-	return ConfigNotExistErr
+	return NotExistErr
 }
