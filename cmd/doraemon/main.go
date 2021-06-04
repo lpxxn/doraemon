@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/c-bata/go-prompt"
@@ -14,12 +13,8 @@ import (
 	"go.uber.org/fx"
 )
 
-// 👻 >
-//const consolePrefix = "⚡️>>> "
-const consolePrefix = "o((=ﾟェﾟ=))o > "
-
-//const consolePrefix = "🤪 >> "
-const mascot1 = `
+const (
+	mascot1 = `
   ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣴⣶⣶⣶⣶⣶⣶⣶⣶⣶⠶⣶⣤⣤⣀⠀⠀⠀⠀⠀⠀ 
   ⠀⠀⠀⠀⠀⠀⠀⢀⣤⣾⣿⣿⣿⣿⣿⠁ ⠀⢀ ⠈⢿⢀⣀   ⠹⣿⣿⣦⣄⠀⠀⠀ 
   ⠀⠀⠀⠀⠀⠀⣴⣿⣿⣿⣿⣿⣿⣿⠿⠀⠀ ⣟⡇⢘ ⣾⣽⠀  ⠀⡏⠉⠙⢛⣷⡖⠀ 
@@ -31,8 +26,9 @@ const mascot1 = `
   ⠈⠓⠶⣶⣾⣿⣿⣿⣿⣿⣧⡀⠀ ⠈⠒⢤⣀⣀⡀⠀⠀⣀⣀⡠⠚⠁ ⠀⢀⡼⠃⠀⠀ 
   ⠀⠀⠀⠈⢿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣤⣤⣤⣭⣭⣭⣭⣭⣥⣤⣤⣤⣴⣟⠁
 `
-
-const openConfigDir = "openConfigDir"
+	consolePrefix = "o((=ﾟェﾟ=))o > "
+	openConfigDir = "openConfigDir"
+)
 
 var existCommand = map[string]struct{}{"exit": {}, ":q": {}, "\\q": {}}
 
@@ -44,7 +40,7 @@ var (
 
 func main() {
 	fmt.Println(mascot1)
-	fmt.Println("type exit or :q or \\q to exit app")
+	utils.SendMsg(false, "type exit or :q or \\q to exit app", " ", utils.Yellow, true)
 	app := fx.New(fx.NopLogger,
 		fx.Provide(config.ParseConfig),
 		fx.Provide(fx.Annotated{
@@ -57,17 +53,57 @@ func main() {
 		}),
 		fx.Provide(RootCMD),
 		fx.Populate(&sd, &lc),
+		fx.Invoke(Lifecycle),
 		fx.Invoke(customCmd))
 	if err := app.Start(context.Background()); err != nil {
 		fmt.Printf("start err: %#v", err)
 	}
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Errorf("start err: %#v", err)
+		fmt.Printf("start err: %#v", err)
 	}
 	if err := app.Stop(context.Background()); err != nil {
-		fmt.Errorf("stop err: %#v", err)
+		fmt.Printf("stop err: %#v", err)
 	}
 	utils.SendMsg(false, "bye ~", "👋👋👋 ", utils.Yellow, true)
+}
+
+func Lifecycle(lc fx.Lifecycle) {
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			utils.SetSttySane()
+			return nil
+		},
+	})
+}
+
+func getSSHCompleter(conf *config.AppConfig) prompt.Completer {
+	return getCompleter(conf.SSHInfo)
+}
+
+func getCustomCMDCompleter(conf *config.AppConfig) prompt.Completer {
+	return getCompleter(conf.CmdInfo)
+}
+
+func getCompleter(c config.InfoCollection) prompt.Completer {
+	var sshSuggest []prompt.Suggest
+
+	for iterator := c.GetIterator(); iterator.HasNext(); {
+		item := iterator.Next()
+		sshSuggest = append(sshSuggest, prompt.Suggest{
+			Text:        item.GetName(),
+			Description: item.GetDesc(),
+		})
+	}
+	sshSuggest = append(sshSuggest, prompt.Suggest{
+		Text:        "openConfigDir",
+		Description: "open config directory",
+	})
+	return func(d prompt.Document) []prompt.Suggest {
+		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
+	}
 }
 
 type cmdParam struct {
@@ -76,13 +112,12 @@ type cmdParam struct {
 	CmdCompleter prompt.Completer `name:"customCmdCompleter"`
 }
 
-func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
+func RootCMD(param cmdParam) *cobra.Command {
 	rootCmd = &cobra.Command{
 		Use:   "doraemon",
 		Short: "doraemon tools",
 		Long:  `ssh manager and .....`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 		exitCmd:
 			for {
 				utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
@@ -109,15 +144,6 @@ func RootCMD(lc fx.Lifecycle, param cmdParam) *cobra.Command {
 			return nil
 		},
 	}
-	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			return nil
-		},
-		OnStop: func(ctx context.Context) error {
-			utils.SetSttySane()
-			return nil
-		},
-	})
 	return rootCmd
 }
 
@@ -132,34 +158,6 @@ func runGlobalCmd(cmdName string) (ran bool, needExist bool) {
 		return true, false
 	}
 	return false, false
-}
-
-func customCmd(rootCmd *cobra.Command, param cmdParam) {
-	cmd := &cobra.Command{
-		Use:   "cmd",
-		Short: "custom cmd",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
-			for {
-				cmdName := prompt.Input(consolePrefix, param.CmdCompleter)
-				if strings.Trim(cmdName, " ") == "" {
-					continue
-				}
-				ran, needExist := runGlobalCmd(cmdName)
-				if ran && needExist {
-					break
-				}
-				if ran {
-					continue
-				}
-				if err := runCustomCmd(cmdName); err != nil {
-					fmt.Println(err)
-				}
-			}
-			return sd.Shutdown()
-		},
-	}
-	rootCmd.AddCommand(cmd)
 }
 
 func startSSHShell(sshName string) error {
@@ -190,57 +188,30 @@ func runCustomCmd(cmdName string) error {
 	return utils.RunCmd(item.Cmd)
 }
 
-func getSSHCompleter(conf *config.AppConfig) prompt.Completer {
-	return getCompleter(conf.SSHInfo)
-}
-
-func getCustomCMDCompleter(conf *config.AppConfig) prompt.Completer {
-	return getCompleter(conf.CmdInfo)
-}
-
-func getCompleter(c config.InfoCollection) prompt.Completer {
-	var sshSuggest []prompt.Suggest
-
-	for iterator := c.GetIterator(); iterator.HasNext(); {
-		item := iterator.Next()
-		sshSuggest = append(sshSuggest, prompt.Suggest{
-			Text:        item.GetName(),
-			Description: item.GetDesc(),
-		})
-	}
-	sshSuggest = append(sshSuggest, prompt.Suggest{
-		Text:        "openConfigDir",
-		Description: "open config directory",
-	})
-	return func(d prompt.Document) []prompt.Suggest {
-		return prompt.FilterHasPrefix(sshSuggest, d.GetWordBeforeCursor(), true)
-	}
-}
-
-func RunSSHCommand(param cmdParam) {
-exitCmd:
-	for {
-		utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
-		//fmt.Println("Please select a command.")
-		cmdName := prompt.Input(consolePrefix, param.SSHCompleter, prompt.OptionAddKeyBind(prompt.KeyBind{
-			Key: prompt.ControlC,
-			Fn: func(buffer *prompt.Buffer) {
-				fmt.Println("👋👋👋 bye ~")
-				os.Exit(0)
-			},
-		}))
-		if _, ok := existCommand[cmdName]; ok {
-			fmt.Println("👋👋👋 bye ~")
-			break exitCmd
-		}
-		if openConfigDir == cmdName {
-			if err := config.OpenConfDir(); err != nil {
-				fmt.Println(err)
+func customCmd(rootCmd *cobra.Command, param cmdParam) {
+	cmd := &cobra.Command{
+		Use:   "cmd",
+		Short: "custom cmd",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
+			for {
+				cmdName := prompt.Input(consolePrefix, param.CmdCompleter)
+				if strings.Trim(cmdName, " ") == "" {
+					continue
+				}
+				ran, needExist := runGlobalCmd(cmdName)
+				if ran && needExist {
+					break
+				}
+				if ran {
+					continue
+				}
+				if err := runCustomCmd(cmdName); err != nil {
+					fmt.Println(err)
+				}
 			}
-			continue
-		}
-		if err := startSSHShell(cmdName); err != nil {
-			fmt.Println(err)
-		}
+			return sd.Shutdown()
+		},
 	}
+	rootCmd.AddCommand(cmd)
 }
