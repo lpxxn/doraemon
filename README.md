@@ -94,5 +94,27 @@ use `proxySSHName` to specify `proxy`
   proxySSHName = "proxy"
   desc = "my sandbox host 1"
 ```
+## run command after login service
+you can use `startCommand` run command after login service
+```
+[[sshInfo]]
+  name = "sandbox1"
+  authMethod = "publickey"
+  uri = "123.13.63.203:22"
+  user = "abc"
+  publicKeyPath = "/Users/abc/.ssh/a.pem"
+  desc = "my sandbox host1"
+  startCommand = "cd /home/abc/app/"
+```
 
 # custom command
+config
+```
+[[cmdInfo]]
+  name = "cd_test"
+  cmd = """ 
+  cd /; pwd; ls -al;
+  """
+  desc = "test command"
+```
+you can run `doraemon cmd`
