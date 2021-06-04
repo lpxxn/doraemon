@@ -108,7 +108,13 @@ you can use `startCommand` run command after login service
 ```
 
 # custom command
-
+config
 ```
-
+[[cmdInfo]]
+  name = "cd_test"
+  cmd = """ 
+  cd /; pwd; ls -al;
+  """
+  desc = "test command"
 ```
+you can run `doraemon cmd`
