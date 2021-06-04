@@ -7,7 +7,7 @@
 
 developing...
 
-## install from code
+# install from code
 ```
 mkdir -p $GOPATH/src/github.com/lpxxn/doraemon
 cd $GOPATH/src/github.com/lpxxn/doraemon
@@ -16,6 +16,8 @@ cd cmd/doraemon
 export GO111MODULE=on
 make install
 ```
+[x] SSH server management
+[x] Run custom command
 
 # SSH Server management
 
