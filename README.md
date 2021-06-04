@@ -8,6 +8,7 @@
 developing...
 
 # install from code
+
 ```
 mkdir -p $GOPATH/src/github.com/lpxxn/doraemon
 cd $GOPATH/src/github.com/lpxxn/doraemon
@@ -18,12 +19,19 @@ make install
 ```
 
 ## Features
-- [x] SSH server management    
+
+- [x] SSH server management
 - [x] Run custom command
 
-# SSH Server management
+### ssh server management
+run `doraemon`
+![doraemon ssh](/doraemon_ssh.gif)
 
-![doraemon command](/doraemon.gif)
+### custom command
+run `doraemon cmd`
+![doraemon cmd](/doraemon_cmd.gif)
+
+# SSH Server management
 
 ## config
 
