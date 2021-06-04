@@ -16,8 +16,10 @@ cd cmd/doraemon
 export GO111MODULE=on
 make install
 ```
-[x] SSH server management
-[x] Run custom command
+
+## Features
+- [x] SSH server management    
+- [x] Run custom command
 
 # SSH Server management
 
