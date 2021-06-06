@@ -116,7 +116,7 @@ you can use `startCommand` run command after login service
 ```
 
 # custom command
-config
+manage commonly used command
 ```
 [[cmdInfo]]
   name = "cd_test"
