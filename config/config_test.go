@@ -55,7 +55,7 @@ func TestDecode(t *testing.T) {
   publicKeyPath = "a/b/c"
   timout = 0
 
-[[CmdInfo]]
+[[cmdInfo]]
   url = "urltest"
   clientID = "ac"
   clientSecret = "dafd"
