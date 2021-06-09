@@ -36,6 +36,7 @@ var (
 	sd      fx.Shutdowner
 	lc      fx.Lifecycle
 	rootCmd *cobra.Command
+	loopRun bool
 )
 
 func main() {
@@ -58,6 +59,7 @@ func main() {
 	if err := app.Start(context.Background()); err != nil {
 		fmt.Printf("start err: %#v", err)
 	}
+	rootCmd.PersistentFlags().BoolVarP(&loopRun, "loopRun", "l", false, "not exist until type :q or \\q")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Printf("start err: %#v", err)
 	}
@@ -134,7 +136,7 @@ func RootCMD(param cmdParam) *cobra.Command {
 				}
 				if err := startSSHShell(cmdName); err != nil {
 					fmt.Println(err)
-				} else {
+				} else if !loopRun {
 					break exitCmd
 				}
 			}
