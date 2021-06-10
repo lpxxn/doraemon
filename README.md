@@ -76,9 +76,7 @@ if your publickey is encrypted you need `passphrase`
 
 ### proxy
 
-if you have proxy host
-
-add a proxy
+if there is a proxy service, you must first configure the proxy server, other configurations use `proxySSHName` to specify the proxy server
 
 ```
 [[sshInfo]]
@@ -89,8 +87,6 @@ add a proxy
   publicKeyPath = "/Users/abc/.ssh/my_test.pem"
   desc = "proxy"
 ```
-
-use `proxySSHName` to specify `proxy`
 
 ```
 [[sshInfo]]
