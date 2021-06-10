@@ -1,7 +1,9 @@
 package config
 
 import (
+	_ "embed"
 	"fmt"
+	"io"
 	"os"
 	"path"
 
@@ -11,10 +13,12 @@ import (
 
 const (
 	confDirName = ".doraemon"
-	//	confFileName = "doraemon.toml"
 )
 
 var confFileName = "doraemon.toml"
+
+//go:embed config.toml
+var dummyConfData []byte
 
 func GetConfig() (*os.File, error) {
 	confPath := ConfFilePath()
@@ -26,7 +30,7 @@ func GetConfig() (*os.File, error) {
 				fmt.Println("open conf dir error")
 			}
 		}()
-		return os.Create(confPath)
+		return WritStringToConfig(string(dummyConfData))
 	}
 	//return os.OpenFile(confPath, os.O_RDWR, 0666)
 	return os.Open(confPath)
@@ -52,15 +56,32 @@ func OpenConfDir() error {
 	return open.Run(ConfDir())
 }
 
-func WritToConfig(v interface{}) error {
+func WritTomlToConfig(v interface{}) error {
+	w, err := writeDataToConfig()
+	if err != nil {
+		return err
+	}
+	return toml.NewEncoder(w).Encode(v)
+}
+
+func WritStringToConfig(d string) (*os.File, error) {
+	w, err := writeDataToConfig()
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.WriteString(w, d)
+	return w, nil
+}
+
+func writeDataToConfig() (*os.File, error) {
 	confPath := ConfFilePath()
 	var f *os.File
 	if _, err := os.Stat(confPath); os.IsNotExist(err) {
 		if f, err = os.Create(confPath); err != nil {
-			return err
+			return nil, err
 		}
 	} else if f, err = os.OpenFile(confPath, os.O_RDWR, 0666); err != nil {
-		return err
+		return nil, err
 	}
-	return toml.NewEncoder(f).Encode(v)
+	return f, nil
 }
