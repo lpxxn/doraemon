@@ -1,0 +1,53 @@
+## publicKeyPath
+#[[sshInfo]]
+#name = "cafe_sandbox1"
+#authMethod = "publickey"
+#uri = "17.4.1.5:22"
+#user = "ec2-user"
+#publicKeyPath = "/Users/li/.ssh/a.pem"
+#desc = "test1 server"
+
+## use startCommand
+#[[sshInfo]]
+#name = "cafe_sandbox2"
+#authMethod = "publickey"
+#uri = "2.4.1.3:22"
+#user = "ec2-user"
+#publicKeyPath = "/Users/li/.ssh/a.pem"
+#startCommand = "tmux attach -t work"
+#desc = "test1 server"
+
+## password
+#[[sshInfo]]
+#name = "pwdservr"
+#authMethod = "password"
+#uri = "127.0.0.1:222"
+#user = "testuser"
+#passphrase = "123"
+#desc = "sandbox deploy server"
+
+## ssh proxy
+#[[sshInfo]]
+#name = "proxyServ"
+#authMethod = "publickey"
+#uri = "192.168.1.7:22"
+#user = "lipeng"
+#publicKeyPath = "/Users/abc/.ssh/my_test.pem"
+#desc = "proxy"
+
+#[[sshInfo]]
+#name = "my_sandbox1"
+#authMethod = "publickey"
+#uri = "192.168.1.8:22"
+#user = "lipeng"
+#publicKeyPath = "/Users/li/.ssh/test.pem"
+#proxySSHName = "proxyServ"
+#desc = "my sandbox host 1"
+
+## custom command
+#[[cmdInfo]]
+#name = "cd_test"
+#cmd = """
+#  cd /; pwd; ls -al;
+#  """
+#desc = "test command"

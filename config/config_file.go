@@ -17,7 +17,7 @@ const (
 
 var confFileName = "doraemon.toml"
 
-//go:embed config.toml
+//go:embed config_sample
 var dummyConfData []byte
 
 func GetConfig() (*os.File, error) {

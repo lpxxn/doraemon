@@ -45,7 +45,7 @@ func TestWriteConf(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = WritStringToConfig(string(dummyConfData))
+	_, err = WritStringToConfig(string(dummyConfData))
 	if err != nil {
 		t.Fatal(err)
 	}
