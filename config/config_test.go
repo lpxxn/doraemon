@@ -41,7 +41,11 @@ func TestWriteConf(t *testing.T) {
 		ProxySSHName:  "",
 		Desc:          "proxy",
 	}}}
-	err := WritToConfig(conf)
+	err := WritTomlToConfig(conf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = WritStringToConfig(string(dummyConfData))
 	if err != nil {
 		t.Fatal(err)
 	}
