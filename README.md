@@ -113,6 +113,16 @@ you can use `startCommand` run command after login service
   publicKeyPath = "/Users/abc/.ssh/a.pem"
   desc = "my sandbox host1"
   startCommand = "cd /home/abc/app/"
+
+[[sshInfo]]
+  name = "sandbox1"
+  authMethod = "publickey"
+  uri = "123.13.63.203:22"
+  user = "abc"
+  publicKeyPath = "/Users/abc/.ssh/a.pem"
+  desc = "my sandbox host1"
+  startCommand = "tmux attach -t abc"
+  
 ```
 
 # custom command
