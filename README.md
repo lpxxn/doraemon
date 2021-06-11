@@ -7,8 +7,9 @@
 
 developing...
 
-# install from code
+# install 
 
+## install from code
 ```
 mkdir -p $GOPATH/src/github.com/lpxxn/doraemon
 cd $GOPATH/src/github.com/lpxxn/doraemon
@@ -16,6 +17,37 @@ git clone https://github.com/lpxxn/doraemon.git
 cd cmd/doraemon
 export GO111MODULE=on
 make install
+```
+
+## install from go get
+
+```
+GO111MODULE=on go get -u github.com/lpxxn/doraemon/cmd/doraemon
+```
+
+### help
+```
+doraemon -h
+```
+```
+type exit or :q or \q to exit app
+
+ssh manager and .....
+
+Usage:
+  doraemon [flags]
+  doraemon [command]
+
+Available Commands:
+  cmd         custom cmd
+  help        Help about any command
+
+Flags:
+  -h, --help      help for doraemon
+  -l, --loopRun   not exist until type :q or \q
+
+Use "doraemon [command] --help" for more information about a command.
+bye ~ 👋👋👋
 ```
 
 ## Features
