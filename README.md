@@ -55,15 +55,9 @@ bye ~ 👋👋👋
 - [x] SSH server management
 - [x] Run custom command
 
-### ssh server management
+# SSH Server management
 run `doraemon`
 ![doraemon ssh](/doraemon_ssh.gif)
-
-### custom command
-run `doraemon cmd`
-![doraemon cmd](/doraemon_cmd.gif)
-
-# SSH Server management
 
 ## config
 
@@ -154,6 +148,9 @@ you can use `startCommand` run command after login service
 ```
 
 # custom command
+run `doraemon cmd`
+![doraemon cmd](/doraemon_cmd.gif)
+
 manage commonly used command
 ```
 [[cmdInfo]]
