@@ -46,6 +46,7 @@ github.com/spf13/pflag
 # go.uber.org/atomic v1.5.0
 go.uber.org/atomic
 # go.uber.org/dig v1.10.0
+## explicit
 go.uber.org/dig
 go.uber.org/dig/internal/digreflect
 go.uber.org/dig/internal/dot

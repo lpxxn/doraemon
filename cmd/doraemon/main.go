@@ -62,6 +62,7 @@ func main() {
 	rootCmd.PersistentFlags().BoolVarP(&loopRun, "loopRun", "l", false, "not exist until type :q or \\q")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Printf("start err: %#v", err)
+		return
 	}
 	if err := app.Stop(context.Background()); err != nil {
 		fmt.Printf("stop err: %#v", err)
@@ -118,7 +119,7 @@ func RootCMD(param cmdParam) *cobra.Command {
 	rootCmd = &cobra.Command{
 		Use:   "doraemon",
 		Short: "doraemon tools",
-		Long:  `ssh manager and .....`,
+		Long:  `ssh manager and run custom cmd`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 		exitCmd:
 			for {
@@ -141,7 +142,7 @@ func RootCMD(param cmdParam) *cobra.Command {
 				}
 			}
 			if err := sd.Shutdown(); err != nil {
-				fmt.Println("sd shutdown error", err)
+				fmt.Println("shutdown error", err)
 			}
 			return nil
 		},
@@ -193,7 +194,7 @@ func runCustomCmd(cmdName string) error {
 func customCmd(rootCmd *cobra.Command, param cmdParam) {
 	cmd := &cobra.Command{
 		Use:   "cmd",
-		Short: "custom cmd",
+		Short: "run custom cmd",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
 			for {

@@ -1,14 +1,11 @@
 <p align="center">
   <img src="/doraemon.png" height="100">
-  <h1 align="center">
+  <h2 align="center">
     Just Like Doraemon, Give Me All Tools I Need ~ 
-  </h1>
+  </h2>
 </p>
 
-developing...
-
-# install 
-
+# install
 ## install from code
 ```
 mkdir -p $GOPATH/src/github.com/lpxxn/doraemon
@@ -20,7 +17,6 @@ make install
 ```
 
 ## install from go get
-
 ```
 GO111MODULE=on go get -u github.com/lpxxn/doraemon/cmd/doraemon
 ```
@@ -29,34 +25,11 @@ GO111MODULE=on go get -u github.com/lpxxn/doraemon/cmd/doraemon
 ```
 doraemon -h
 ```
-```
-type exit or :q or \q to exit app
-
-ssh manager and .....
-
-Usage:
-  doraemon [flags]
-  doraemon [command]
-
-Available Commands:
-  cmd         custom cmd
-  help        Help about any command
-
-Flags:
-  -h, --help      help for doraemon
-  -l, --loopRun   not exist until type :q or \q
-
-Use "doraemon [command] --help" for more information about a command.
-bye ~ 👋👋👋
-```
-
 ## Features
-
 - [x] SSH server management
 - [x] Run custom command
-
 # SSH Server management
-run `doraemon`
+run `doraemon`    
 ![doraemon ssh](/doraemon_ssh.gif)
 
 ## config
