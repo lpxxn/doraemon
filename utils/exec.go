@@ -56,7 +56,6 @@ func ExecCommand(command string, options []string) error {
 
 func RunCmd(cmdStr string, cmdDir ...string) error {
 	var err error
-	//fmt.Println("begin run command")
 	cmd, stdout, stderr, err := startCmd(cmdStr, cmdDir...)
 	if err != nil {
 		return err
