@@ -33,11 +33,22 @@ run `doraemon`
 ![doraemon ssh](/doraemon_ssh.gif)
 
 ## config
+The configuration file is in directory `~/.doraemon`,the configuration file will be created when the program is run for the first time.
 
-config directory `~/.doraemon`,the program will create the config file when first run it.
+### password
+connection to the server by username and password.
+```
+[[sshInfo]]
+  name = "pwdservr"
+  authMethod = "password"
+  uri = "127.0.0.1:222"
+  user = "testuser"
+  passphrase = "123"
+  desc = "sandbox deploy server"
+```
 
 ### publickey
-
+if your ssh server connection uses publickey
 ```
 [[sshInfo]]
   name = "sandbox1"
@@ -48,7 +59,7 @@ config directory `~/.doraemon`,the program will create the config file when firs
   desc = "my sandbox host1"
 ```
 
-if your publickey is encrypted you need `passphrase`
+if your publickey is encrypted, use `passphrase` to specify the ciphertext
 
 ```
 [[sshInfo]]
@@ -61,17 +72,6 @@ if your publickey is encrypted you need `passphrase`
   desc = "gateway jumper
 ```
 
-### password
-
-```
-[[sshInfo]]
-  name = "pwdservr"
-  authMethod = "password"
-  uri = "127.0.0.1:222"
-  user = "testuser"
-  passphrase = "123"
-  desc = "sandbox deploy server"
-```
 
 ### proxy
 
