@@ -50,7 +50,7 @@ func BeautifyText(text string, color Color) string {
 	return textColor + text + noColor
 }
 
-// SendMsg function forsend message to output.
+// SendMsg function for send message to output.
 func SendMsg(startWithNewLine bool, caption, text string, color Color, endWithNewLine bool) {
 	// Define variables.
 	var startNewLine, endNewLine string

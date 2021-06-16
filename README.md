@@ -5,7 +5,6 @@
   </h2>
 </p>
 
-# install
 ## install from code
 ```
 mkdir -p $GOPATH/src/github.com/lpxxn/doraemon

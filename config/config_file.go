@@ -75,13 +75,8 @@ func WritStringToConfig(d string) (*os.File, error) {
 
 func writeDataToConfig() (*os.File, error) {
 	confPath := ConfFilePath()
-	var f *os.File
 	if _, err := os.Stat(confPath); os.IsNotExist(err) {
-		if f, err = os.Create(confPath); err != nil {
-			return nil, err
-		}
-	} else if f, err = os.OpenFile(confPath, os.O_RDWR, 0666); err != nil {
-		return nil, err
+		return os.Create(confPath)
 	}
-	return f, nil
+	return os.OpenFile(confPath, os.O_RDWR, 0666)
 }

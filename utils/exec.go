@@ -47,11 +47,7 @@ func ExecCommand(command string, options []string) error {
 	}()
 
 	// Wait for executing command.
-	if err := cmd.Wait(); err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.Wait()
 }
 
 func RunCmd(cmdStr string, cmdDir ...string) error {
@@ -67,11 +63,7 @@ func RunCmd(cmdStr string, cmdDir ...string) error {
 	io.Copy(os.Stdout, stdout)
 	io.Copy(os.Stderr, stderr)
 	// wait for building
-	err = cmd.Wait()
-	if err != nil {
-		return err
-	}
-	return nil
+	return cmd.Wait()
 }
 
 func startCmd(cmd string, cmdDir ...string) (*exec.Cmd, io.ReadCloser, io.ReadCloser, error) {
