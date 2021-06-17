@@ -174,7 +174,7 @@ func (s *sshInfo) ToSSHConfig() (utils.SSHConfig, error) {
 }
 
 func (s *sshInfo) sshPwdConf() (utils.SSHConfig, error) {
-	sshConf := &utils.SSHPasswordConfig{SSHBaseConfig: &utils.SSHBaseConfig{
+	return &utils.SSHPasswordConfig{SSHBaseConfig: &utils.SSHBaseConfig{
 		MethodName:   utils.Password,
 		URI:          s.URI,
 		User:         s.User,
@@ -183,20 +183,10 @@ func (s *sshInfo) sshPwdConf() (utils.SSHConfig, error) {
 		Passphrase:   s.Passphrase,
 		StartCommand: s.StartCommand,
 	},
-	}
-	return sshConf, nil
+	}, nil
 }
 
 func (s *sshInfo) sshPublicKeyConf() (utils.SSHConfig, error) {
-	sshConf := &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{
-		MethodName:   utils.PublicKey,
-		URI:          s.URI,
-		User:         s.User,
-		Timout:       s.Timout,
-		Passphrase:   s.Passphrase,
-		StartCommand: s.StartCommand,
-	},
-	}
 	pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
 	if err != nil {
 		log.Fatal(err)
@@ -212,8 +202,16 @@ func (s *sshInfo) sshPublicKeyConf() (utils.SSHConfig, error) {
 		log.Printf("parse key failed:%v", err)
 		return nil, err
 	}
-	sshConf.AuthMethods = []ssh.AuthMethod{ssh.PublicKeys(signer)}
-	return sshConf, nil
+	return &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{
+		MethodName:   utils.PublicKey,
+		URI:          s.URI,
+		User:         s.User,
+		AuthMethods:  []ssh.AuthMethod{ssh.PublicKeys(signer)},
+		Timout:       s.Timout,
+		Passphrase:   s.Passphrase,
+		StartCommand: s.StartCommand,
+	},
+	}, nil
 }
 
 func (s *sshInfo) HaveProxy() bool {
