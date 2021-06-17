@@ -166,47 +166,54 @@ func (c *cmdIterator) Next() Info {
 func (s *sshInfo) ToSSHConfig() (utils.SSHConfig, error) {
 	authMethod := utils.AuthMethod(s.AuthMethod)
 	if authMethod == utils.PublicKey {
-		sshConf := &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{
-			MethodName:   authMethod,
-			URI:          s.URI,
-			User:         s.User,
-			AuthMethods:  nil,
-			Timout:       s.Timout,
-			Passphrase:   s.Passphrase,
-			StartCommand: s.StartCommand,
-		},
-		}
-		pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
-		if err != nil {
-			log.Fatal(err)
-			return nil, err
-		}
-		var signer ssh.Signer
-		if len(s.Passphrase) > 0 {
-			signer, err = ssh.ParsePrivateKeyWithPassphrase(pemBytes, []byte(s.Passphrase))
-		} else {
-			signer, err = ssh.ParsePrivateKey(pemBytes)
-		}
-		if err != nil {
-			log.Printf("parse key failed:%v", err)
-			return nil, err
-		}
-		sshConf.AuthMethods = []ssh.AuthMethod{ssh.PublicKeys(signer)}
-		return sshConf, nil
+		return s.sshPublicKeyConf()
 	} else if authMethod == utils.Password {
-		sshConf := &utils.SSHPasswordConfig{SSHBaseConfig: &utils.SSHBaseConfig{
-			MethodName:   authMethod,
-			URI:          s.URI,
-			User:         s.User,
-			AuthMethods:  []ssh.AuthMethod{ssh.Password(s.Passphrase)},
-			Timout:       s.Timout,
-			Passphrase:   s.Passphrase,
-			StartCommand: s.StartCommand,
-		},
-		}
-		return sshConf, nil
+		return s.sshPwdConf()
 	}
 	return nil, errors.New("ToSSHConfig error invalid authMethod: " + string(authMethod))
+}
+
+func (s *sshInfo) sshPwdConf() (utils.SSHConfig, error) {
+	sshConf := &utils.SSHPasswordConfig{SSHBaseConfig: &utils.SSHBaseConfig{
+		MethodName:   utils.Password,
+		URI:          s.URI,
+		User:         s.User,
+		AuthMethods:  []ssh.AuthMethod{ssh.Password(s.Passphrase)},
+		Timout:       s.Timout,
+		Passphrase:   s.Passphrase,
+		StartCommand: s.StartCommand,
+	},
+	}
+	return sshConf, nil
+}
+
+func (s *sshInfo) sshPublicKeyConf() (utils.SSHConfig, error) {
+	sshConf := &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{
+		MethodName:   utils.PublicKey,
+		URI:          s.URI,
+		User:         s.User,
+		Timout:       s.Timout,
+		Passphrase:   s.Passphrase,
+		StartCommand: s.StartCommand,
+	},
+	}
+	pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
+	if err != nil {
+		log.Fatal(err)
+		return nil, err
+	}
+	var signer ssh.Signer
+	if len(s.Passphrase) > 0 {
+		signer, err = ssh.ParsePrivateKeyWithPassphrase(pemBytes, []byte(s.Passphrase))
+	} else {
+		signer, err = ssh.ParsePrivateKey(pemBytes)
+	}
+	if err != nil {
+		log.Printf("parse key failed:%v", err)
+		return nil, err
+	}
+	sshConf.AuthMethods = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+	return sshConf, nil
 }
 
 func (s *sshInfo) HaveProxy() bool {
@@ -224,28 +231,43 @@ func ParseConfig() (*AppConfig, error) {
 	if _, err = toml.DecodeReader(f, AppConf); err != nil {
 		return nil, err
 	}
-	// verify
+	if err := AppConf.parseConfig(); err != nil {
+		return nil, err
+	}
+	return AppConf, nil
+}
+
+func (a *AppConfig) parseConfig() error {
+	if err := a.parseSSHConfig(); err != nil {
+		return err
+	}
+	return a.parseCmdConfig()
+}
+func (a *AppConfig) parseSSHConfig() error {
 	var proxyName []string
 	for _, item := range AppConf.SSHInfo {
-		if _, ok := AppConf.sshMapInfo[item.Name]; ok {
+		if _, ok := a.sshMapInfo[item.Name]; ok {
 			continue
 		}
-		AppConf.sshMapInfo[item.Name] = item
+		a.sshMapInfo[item.Name] = item
 		if item.HaveProxy() {
 			proxyName = append(proxyName, item.Name)
 		}
 	}
 	for _, item := range proxyName {
 		if _, ok := AppConf.sshMapInfo[item]; !ok {
-			return nil, configNotExist()
+			return configNotExist()
 		}
 	}
+	return nil
+}
+
+func (a *AppConfig) parseCmdConfig() error {
 	for _, item := range AppConf.CmdInfo {
 		AppConf.cmdMapInfo[item.Name] = item
 	}
-	return AppConf, nil
+	return nil
 }
-
 func configNotExist() error {
 	return NotExistErr
 }
