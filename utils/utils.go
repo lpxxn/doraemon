@@ -2,8 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 )
 
 type Color string
@@ -68,13 +66,4 @@ func SendMsg(startWithNewLine bool, caption, text string, color Color, endWithNe
 	} else {
 		fmt.Println(startNewLine + BeautifyText(caption, color) + " " + text + endNewLine) // colorized text
 	}
-}
-
-func SetSttySane() {
-	// https://github.com/c-bata/go-prompt/issues/233
-	//rawModeOff := exec.Command("/bin/stty", "-raw", "echo")
-	rawModeOff := exec.Command("/bin/stty", "sane")
-	rawModeOff.Stdin = os.Stdin
-	_ = rawModeOff.Run()
-	rawModeOff.Wait()
 }

@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"syscall"
 	"time"
@@ -269,4 +270,13 @@ func (s *sshClient) logger(session *ssh.Session) error {
 	}
 
 	return nil
+}
+
+func SetSttySane() {
+	// https://github.com/c-bata/go-prompt/issues/233
+	//rawModeOff := exec.Command("/bin/stty", "-raw", "echo")
+	rawModeOff := exec.Command("/bin/stty", "sane")
+	rawModeOff.Stdin = os.Stdin
+	_ = rawModeOff.Run()
+	rawModeOff.Wait()
 }
