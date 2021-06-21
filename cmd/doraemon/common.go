@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/lpxxn/doraemon/config"
-	"github.com/lpxxn/doraemon/utils"
+	"github.com/lpxxn/doraemon/internal"
 )
 
 func runGlobalCmd(cmdName string) (ran bool, needExist bool) {
@@ -25,7 +25,7 @@ func runCustomCmd(cmdName string) error {
 	if err != nil {
 		return err
 	}
-	return utils.RunCmd(item.Cmd)
+	return internal.RunCmd(item.Cmd)
 }
 
 func startSSHShell(sshName string) error {
@@ -33,7 +33,7 @@ func startSSHShell(sshName string) error {
 	if err != nil {
 		return err
 	}
-	client, err := utils.NewSSHClient(sshConfig)
+	client, err := internal.NewSSHClient(sshConfig)
 	if err != nil {
 		return err
 	}

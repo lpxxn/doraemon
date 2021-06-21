@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"github.com/lpxxn/doraemon/utils"
+	"github.com/lpxxn/doraemon/internal"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -34,7 +34,7 @@ func (a *AppConfig) ConfigByName(name string) (*sshInfo, error) {
 	return nil, os.ErrNotExist
 }
 
-func SSHConfigByName(sshName string) (utils.SSHConfig, error) {
+func SSHConfigByName(sshName string) (internal.SSHConfig, error) {
 	item, ok := AppConf.sshMapInfo[sshName]
 	if !ok {
 		return nil, configNotExist()
@@ -163,19 +163,19 @@ func (c *cmdIterator) Next() Info {
 	return nil
 }
 
-func (s *sshInfo) ToSSHConfig() (utils.SSHConfig, error) {
-	authMethod := utils.AuthMethod(s.AuthMethod)
-	if authMethod == utils.PublicKey {
+func (s *sshInfo) ToSSHConfig() (internal.SSHConfig, error) {
+	authMethod := internal.AuthMethod(s.AuthMethod)
+	if authMethod == internal.PublicKey {
 		return s.sshPublicKeyConf()
-	} else if authMethod == utils.Password {
+	} else if authMethod == internal.Password {
 		return s.sshPwdConf()
 	}
 	return nil, errors.New("ToSSHConfig error invalid authMethod: " + string(authMethod))
 }
 
-func (s *sshInfo) sshPwdConf() (utils.SSHConfig, error) {
-	return &utils.SSHPasswordConfig{SSHBaseConfig: &utils.SSHBaseConfig{
-		MethodName:   utils.Password,
+func (s *sshInfo) sshPwdConf() (internal.SSHConfig, error) {
+	return &internal.SSHPasswordConfig{SSHBaseConfig: &internal.SSHBaseConfig{
+		MethodName:   internal.Password,
 		URI:          s.URI,
 		User:         s.User,
 		AuthMethods:  []ssh.AuthMethod{ssh.Password(s.Passphrase)},
@@ -186,7 +186,7 @@ func (s *sshInfo) sshPwdConf() (utils.SSHConfig, error) {
 	}, nil
 }
 
-func (s *sshInfo) sshPublicKeyConf() (utils.SSHConfig, error) {
+func (s *sshInfo) sshPublicKeyConf() (internal.SSHConfig, error) {
 	pemBytes, err := ioutil.ReadFile(s.PublicKeyPath)
 	if err != nil {
 		log.Fatal(err)
@@ -202,8 +202,8 @@ func (s *sshInfo) sshPublicKeyConf() (utils.SSHConfig, error) {
 		log.Printf("parse key failed:%v", err)
 		return nil, err
 	}
-	return &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{
-		MethodName:   utils.PublicKey,
+	return &internal.SSHPrivateKeyConfig{SSHBaseConfig: &internal.SSHBaseConfig{
+		MethodName:   internal.PublicKey,
 		URI:          s.URI,
 		User:         s.User,
 		AuthMethods:  []ssh.AuthMethod{ssh.PublicKeys(signer)},

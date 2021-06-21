@@ -7,7 +7,7 @@ import (
 
 	"github.com/c-bata/go-prompt"
 	"github.com/lpxxn/doraemon/config"
-	"github.com/lpxxn/doraemon/utils"
+	"github.com/lpxxn/doraemon/internal"
 	"github.com/spf13/cobra"
 	"go.uber.org/dig"
 	"go.uber.org/fx"
@@ -41,7 +41,7 @@ var (
 
 func main() {
 	fmt.Println(mascot1)
-	utils.SendMsg(false, "type exit or :q or \\q to exit app", " ", utils.Yellow, true)
+	internal.SendMsg(false, "type exit or :q or \\q to exit app", " ", internal.Yellow, true)
 	app := fx.New(fx.NopLogger,
 		fx.Provide(config.ParseConfig),
 		fx.Provide(fx.Annotated{
@@ -67,7 +67,7 @@ func main() {
 	if err := app.Stop(context.Background()); err != nil {
 		fmt.Printf("stop err: %#v", err)
 	}
-	utils.SendMsg(false, "bye ~", "👋👋👋 ", utils.Yellow, true)
+	internal.SendMsg(false, "bye ~", "👋👋👋 ", internal.Yellow, true)
 }
 
 func Lifecycle(lc fx.Lifecycle) {
@@ -76,7 +76,7 @@ func Lifecycle(lc fx.Lifecycle) {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			utils.SetSttySane()
+			internal.SetSttySane()
 			return nil
 		},
 	})
@@ -123,7 +123,7 @@ func RootCMD(param cmdParam) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 		exitCmd:
 			for {
-				utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
+				internal.SendMsg(true, "Hi!", "Please select a command.", internal.Yellow, false)
 				cmdName := prompt.Input(consolePrefix, param.SSHCompleter)
 				if strings.Trim(cmdName, " ") == "" {
 					continue
@@ -155,7 +155,7 @@ func customCmd(rootCmd *cobra.Command, param cmdParam) {
 		Use:   "cmd",
 		Short: "run custom cmd",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
+			internal.SendMsg(true, "Hi!", "Please select a command.", internal.Yellow, false)
 			for {
 				cmdName := prompt.Input(consolePrefix, param.CmdCompleter)
 				if strings.Trim(cmdName, " ") == "" {
