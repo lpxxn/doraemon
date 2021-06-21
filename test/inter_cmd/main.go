@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/c-bata/go-prompt"
-	"github.com/lpxxn/doraemon/utils"
+	"github.com/lpxxn/doraemon/internal"
 	"go.uber.org/dig"
 )
 
@@ -59,7 +59,7 @@ func (s *sshPromptInfo) Desc() string {
 }
 
 func (s *sshPromptInfo) Exec() error {
-	utils.SendMsg(true, "Hi!", "Please select a command.", utils.Yellow, false)
+	internal.SendMsg(true, "Hi!", "Please select a command.", internal.Yellow, false)
 	//fmt.Println("Please select a command.")
 	cmdName := prompt.Input(consolePrefix, s.Completer, prompt.OptionAddKeyBind(prompt.KeyBind{
 		Key: prompt.ControlC,

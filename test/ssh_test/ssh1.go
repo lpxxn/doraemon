@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/lpxxn/doraemon/utils"
+	"github.com/lpxxn/doraemon/internal"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -17,7 +17,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	conf := mConf()
-	client, err := utils.NewSSHClient(conf)
+	client, err := internal.NewSSHClient(conf)
 	if err != nil {
 		panic(err)
 	}
@@ -33,8 +33,8 @@ func main() {
 	}
 }
 
-func mConf() *utils.SSHPrivateKeyConfig {
-	rev := &utils.SSHPrivateKeyConfig{SSHBaseConfig: &utils.SSHBaseConfig{MethodName: utils.PublicKey}}
+func mConf() *internal.SSHPrivateKeyConfig {
+	rev := &internal.SSHPrivateKeyConfig{SSHBaseConfig: &internal.SSHBaseConfig{MethodName: internal.PublicKey}}
 	if envProxyHost := os.Getenv("SSH_PROXY_HOST"); len(envProxyHost) > 0 {
 		rev.URI = envProxyHost
 	}
