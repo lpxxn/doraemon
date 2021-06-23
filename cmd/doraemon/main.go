@@ -41,7 +41,7 @@ var (
 
 func main() {
 	fmt.Println(mascot1)
-	internal.SendMsg(false, "type exit or :q or \\q to exit app", " ", internal.Yellow, true)
+	internal.SendMsg(false, "type exit or :q or \\q to exit", " ", internal.Yellow, true)
 	app := fx.New(fx.NopLogger,
 		fx.Provide(config.ParseConfig),
 		fx.Provide(fx.Annotated{
