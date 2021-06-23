@@ -22,13 +22,6 @@ const (
 	Password  AuthMethod = "password"
 )
 
-var AuthMethodMap map[AuthMethod]struct{} = map[AuthMethod]struct{}{PublicKey: {}, Password: {}}
-
-func VerifyAuthMethod(m AuthMethod) bool {
-	_, ok := AuthMethodMap[m]
-	return ok
-}
-
 type SSHConfig interface {
 	SSHConfig() *ssh.ClientConfig
 	AuthMethodName() AuthMethod
