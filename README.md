@@ -97,7 +97,7 @@ if there is a proxy service, you must first configure the proxy server, other co
   desc = "my sandbox host 1"
 ```
 ## run command after login service
-you can use `startCommand` run command after login service
+you can use `startCommand` to run custom command after login service
 ```
 [[sshInfo]]
   name = "sandbox1"
