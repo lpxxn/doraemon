@@ -171,6 +171,9 @@ func customCmd(rootCmd *cobra.Command, param cmdParam) {
 				if err := runCustomCmd(cmdName); err != nil {
 					fmt.Println(err)
 				}
+				if !loopRun {
+					break
+				}
 			}
 			return sd.Shutdown()
 		},
