@@ -32,8 +32,8 @@ run `doraemon`
 ![doraemon ssh](/doraemon_ssh.gif)
 
 ## config
-The configuration file is in directory `~/.doraemon`,the configuration file will be created when the program is run for the first time.
-
+The configuration file is in directory `~/.doraemon`,the configuration file will be created when the program is run for the first time.    
+you can run `doraemon`, type `openConfigDir` open the configuration directory
 ### password
 connection to the server by username and password.
 ```
