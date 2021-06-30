@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 	"os"
+
+	"github.com/skratchdot/open-golang/open"
 )
 
 type Color string
@@ -75,4 +77,8 @@ func MakeFolder(folderName string, chmod os.FileMode) error {
 	} else {
 		return err
 	}
+}
+
+func OpenFolder(folderName string) error {
+	return open.Run(folderName)
 }

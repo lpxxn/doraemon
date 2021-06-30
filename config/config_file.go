@@ -9,7 +9,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/lpxxn/doraemon/internal"
-	"github.com/skratchdot/open-golang/open"
 )
 
 const (
@@ -52,7 +51,7 @@ func ConfDir() string {
 	return dirPath
 }
 func OpenConfDir() error {
-	return open.Run(ConfDir())
+	return internal.OpenFolder(ConfDir())
 }
 
 func WritTomlToConfig(v interface{}) error {
