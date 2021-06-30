@@ -2,6 +2,9 @@ package internal
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/skratchdot/open-golang/open"
 )
 
 type Color string
@@ -66,4 +69,16 @@ func SendMsg(startWithNewLine bool, caption, text string, color Color, endWithNe
 	} else {
 		fmt.Println(startNewLine + BeautifyText(caption, color) + " " + text + endNewLine) // colorized text
 	}
+}
+
+func MakeFolder(folderName string, chmod os.FileMode) error {
+	if _, err := os.Stat(folderName); os.IsNotExist(err) {
+		return os.MkdirAll(folderName, chmod)
+	} else {
+		return err
+	}
+}
+
+func OpenFolder(folderName string) error {
+	return open.Run(folderName)
 }

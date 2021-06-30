@@ -8,7 +8,7 @@ import (
 	"path"
 
 	"github.com/BurntSushi/toml"
-	"github.com/skratchdot/open-golang/open"
+	"github.com/lpxxn/doraemon/internal"
 )
 
 const (
@@ -45,15 +45,13 @@ func ConfDir() string {
 		panic(err)
 	}
 	dirPath := path.Join(rootDir, confDirName)
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		if err = os.MkdirAll(dirPath, os.ModePerm); err != nil {
-			panic(err)
-		}
+	if err := internal.MakeFolder(dirPath, os.ModePerm); err != nil {
+		panic(err)
 	}
 	return dirPath
 }
 func OpenConfDir() error {
-	return open.Run(ConfDir())
+	return internal.OpenFolder(ConfDir())
 }
 
 func WritTomlToConfig(v interface{}) error {
