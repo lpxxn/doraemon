@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/BurntSushi/toml"
+	"github.com/lpxxn/doraemon/internal"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -45,10 +46,8 @@ func ConfDir() string {
 		panic(err)
 	}
 	dirPath := path.Join(rootDir, confDirName)
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		if err = os.MkdirAll(dirPath, os.ModePerm); err != nil {
-			panic(err)
-		}
+	if err := internal.MakeFolder(dirPath, os.ModePerm); err != nil {
+		panic(err)
 	}
 	return dirPath
 }

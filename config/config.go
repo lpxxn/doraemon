@@ -266,6 +266,7 @@ func (a *AppConfig) parseCmdConfig() error {
 	}
 	return nil
 }
+
 func configNotExist() error {
 	return NotExistErr
 }
