@@ -35,6 +35,11 @@ github.com/mattn/go-tty
 github.com/mgutz/ansi
 # github.com/pkg/term v1.2.0-beta.2
 github.com/pkg/term/termios
+# github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
+## explicit
+github.com/skip2/go-qrcode
+github.com/skip2/go-qrcode/bitset
+github.com/skip2/go-qrcode/reedsolomon
 # github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 ## explicit
 github.com/skratchdot/open-golang/open
