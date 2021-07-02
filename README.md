@@ -6,6 +6,7 @@
 </p>
 
 ## install from code
+
 ```
 mkdir -p $GOPATH/src/github.com/lpxxn/doraemon
 cd $GOPATH/src/github.com/lpxxn/doraemon
@@ -16,27 +17,38 @@ make install
 ```
 
 ## install from go get
+
 ```
 GO111MODULE=on go get -u github.com/lpxxn/doraemon/cmd/doraemon
 ```
 
 ### help
+
 ```
 doraemon -h
 ```
+
 ## Features
+
 - [x] SSH server management
 - [x] Run custom command
-- [ ] Simple http service for sharing files
+- [x] Simple http service for sharing files
+
 # SSH Server management
+
 run `doraemon`    
 ![doraemon ssh](/doraemon_ssh.gif)
 
 ## config
-The configuration file is in directory `~/.doraemon`,the configuration file will be created when the program is run for the first time.    
+
+The configuration file is in directory `~/.doraemon`,the configuration file will be created when the program is run for
+the first time.    
 you can run `doraemon`, type `openConfigDir` open the configuration directory
+
 ### password
+
 connection to the server by username and password.
+
 ```
 [[sshInfo]]
   name = "pwdservr"
@@ -48,7 +60,9 @@ connection to the server by username and password.
 ```
 
 ### publickey
+
 if your ssh server connection uses publickey
+
 ```
 [[sshInfo]]
   name = "sandbox1"
@@ -72,10 +86,10 @@ if your publickey is encrypted, use `passphrase` to specify the ciphertext
   desc = "gateway jumper
 ```
 
-
 ### proxy
 
-if there is a proxy service, you must first configure the proxy server, other configurations use `proxySSHName` to specify the proxy server
+if there is a proxy service, you must first configure the proxy server, other configurations use `proxySSHName` to
+specify the proxy server
 
 ```
 [[sshInfo]]
@@ -97,8 +111,11 @@ if there is a proxy service, you must first configure the proxy server, other co
   proxySSHName = "proxy"
   desc = "my sandbox host 1"
 ```
+
 ## run command after login service
+
 you can use `startCommand` to run custom command after login service
+
 ```
 [[sshInfo]]
   name = "sandbox1"
@@ -120,11 +137,21 @@ you can use `startCommand` to run custom command after login service
   
 ```
 
+# simple http service for sharing files
+
+Share folder via httpe service    
+![doraemon srv](/doraemon_srv.gif)
+
+```
+doraemon srv .
+```
+
 # custom command
-run `doraemon cmd`
+run `doraemon cmd`    
 ![doraemon cmd](/doraemon_cmd.gif)
 
 manage commonly used command
+
 ```
 [[cmdInfo]]
   name = "cd_test"
@@ -133,4 +160,5 @@ manage commonly used command
   """
   desc = "test command"
 ```
+
 you can run `doraemon cmd`
