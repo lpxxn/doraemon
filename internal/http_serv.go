@@ -2,8 +2,28 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"net"
+	"net/http"
 )
+
+func HttpFileServ(folderPath string) error {
+	ip, err := PrivateIPv4()
+	if err != nil {
+		return err
+	}
+
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return err
+	}
+	http.Handle("/", http.FileServer(http.Dir(folderPath)))
+
+	SendMsg(false, "", fmt.Sprintf("Serving %s on HTTP port: %d\n", folderPath, listener.Addr().(*net.TCPAddr).Port), Cyan, false)
+	addr := fmt.Sprintf("http://%s:%d", ip.String(), listener.Addr().(*net.TCPAddr).Port)
+	SendMsg(false, "open in brower", addr, Yellow, false)
+	return http.Serve(listener, nil)
+}
 
 func PrivateIPv4() (net.IP, error) {
 	as, err := net.InterfaceAddrs()
