@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -10,6 +11,9 @@ import (
 )
 
 func main() {
+	directory := flag.String("d", ".", "the directory of static file to host")
+	flag.Parse()
+
 	ip, err := internal.PrivateIPv4()
 	if err != nil {
 		panic(err)
@@ -19,10 +23,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	directory := "./"
-	http.Handle("/", http.FileServer(http.Dir(directory)))
+	http.Handle("/", http.FileServer(http.Dir(*directory)))
 
-	log.Printf("Serving %s on HTTP port: %d\n", directory, listener.Addr().(*net.TCPAddr).Port)
+	log.Printf("Serving %s on HTTP port: %d\n", *directory, listener.Addr().(*net.TCPAddr).Port)
 	addr := fmt.Sprintf("http://%s:%d", ip.String(), listener.Addr().(*net.TCPAddr).Port)
 	fmt.Println(addr)
 	log.Fatal(http.Serve(listener, nil))
