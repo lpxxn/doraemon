@@ -31,8 +31,8 @@ doraemon -h
 ## Features
 
 - [x] SSH server management
-- [x] Run custom command
 - [x] Simple http service for sharing files
+- [x] Run custom command
 
 # SSH Server management
 
