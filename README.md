@@ -140,11 +140,12 @@ you can use `startCommand` to run custom command after login service
 # simple http service for sharing files
 
 Share folder via httpe service    
-![doraemon srv](/doraemon_srv.gif)
-
 ```
 doraemon srv .
-```
+```    
+![doraemon srv](/doraemon_srv.gif)
+
+
 
 # custom command
 run `doraemon cmd`    
