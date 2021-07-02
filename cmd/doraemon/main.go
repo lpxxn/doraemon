@@ -41,7 +41,6 @@ var (
 
 func main() {
 	fmt.Println(mascot1)
-	internal.SendMsg(false, "type exit or :q or \\q to exit", " ", internal.Yellow, true)
 	app := fx.New(fx.NopLogger,
 		fx.Provide(config.ParseConfig),
 		fx.Provide(fx.Annotated{
@@ -55,7 +54,7 @@ func main() {
 		fx.Provide(RootCMD),
 		fx.Populate(&sd, &lc),
 		fx.Invoke(Lifecycle),
-		fx.Invoke(customCmd))
+		fx.Invoke(customCmd), fx.Invoke(httpSrvCmd))
 	if err := app.Start(context.Background()); err != nil {
 		fmt.Printf("start err: %#v", err)
 	}
@@ -121,6 +120,7 @@ func RootCMD(param cmdParam) *cobra.Command {
 		Short: "doraemon tools",
 		Long:  `ssh manager and run custom cmd`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SendMsg(false, "type exit or :q or \\q to exit", " ", internal.Yellow, true)
 		exitCmd:
 			for {
 				internal.SendMsg(true, "Hi!", "Please select a command.", internal.Yellow, false)
@@ -155,6 +155,7 @@ func customCmd(rootCmd *cobra.Command, param cmdParam) {
 		Use:   "cmd",
 		Short: "run custom cmd",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			internal.SendMsg(false, "type exit or :q or \\q to exit", " ", internal.Yellow, true)
 			internal.SendMsg(true, "Hi!", "Please select a command.", internal.Yellow, false)
 			for {
 				cmdName := prompt.Input(consolePrefix, param.CmdCompleter)
@@ -176,6 +177,25 @@ func customCmd(rootCmd *cobra.Command, param cmdParam) {
 				}
 			}
 			return sd.Shutdown()
+		},
+	}
+	rootCmd.AddCommand(cmd)
+}
+
+func httpSrvCmd(rootCmd *cobra.Command) {
+	cmd := &cobra.Command{
+		Use:   "srv",
+		Short: "Simple http service for sharing files",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			defer sd.Shutdown()
+			p := "."
+			if len(args) > 0 {
+				p = args[0]
+			}
+			if err := internal.HttpFileServ(p); err != nil {
+				internal.SendMsg(false, "Error", err.Error(), internal.Yellow, false)
+			}
+			return nil
 		},
 	}
 	rootCmd.AddCommand(cmd)
