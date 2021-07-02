@@ -3,7 +3,7 @@ module github.com/lpxxn/doraemon
 go 1.16
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.2.12
+	github.com/AlecAivazis/survey/v2 v2.2.13
 	github.com/BurntSushi/toml v0.3.1
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/creack/pty v1.1.12

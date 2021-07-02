@@ -1,4 +1,4 @@
-# github.com/AlecAivazis/survey/v2 v2.2.12
+# github.com/AlecAivazis/survey/v2 v2.2.13
 ## explicit
 github.com/AlecAivazis/survey/v2
 github.com/AlecAivazis/survey/v2/core
@@ -82,8 +82,11 @@ golang.org/x/lint/golint
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
+# golang.org/x/term v0.0.0-20210503060354-a79de5458b56
+golang.org/x/term
 # golang.org/x/text v0.3.3
 golang.org/x/text/transform
 golang.org/x/text/width
