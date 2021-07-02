@@ -27,6 +27,7 @@ doraemon -h
 ## Features
 - [x] SSH server management
 - [x] Run custom command
+- [ ] Simple http service for sharing files
 # SSH Server management
 run `doraemon`    
 ![doraemon ssh](/doraemon_ssh.gif)
