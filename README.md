@@ -139,7 +139,7 @@ you can use `startCommand` to run custom command after login service
 
 # simple http service for sharing files
 
-Share folder via httpe service    
+Share folder via http service    
 ```
 doraemon srv .
 ```    
