@@ -21,7 +21,7 @@ func HttpFileServ(folderPath string) error {
 
 	SendMsg(false, "", fmt.Sprintf("Serving %s on HTTP port: %d\n", folderPath, listener.Addr().(*net.TCPAddr).Port), Cyan, false)
 	addr := fmt.Sprintf("http://%s:%d", ip.String(), listener.Addr().(*net.TCPAddr).Port)
-	SendMsg(false, "open in brower, or scan QR", addr, Yellow, false)
+	SendMsg(false, "open in brower, or scan QR", addr, Yellow, true)
 	RenderQRString(addr)
 	return http.Serve(listener, nil)
 }
