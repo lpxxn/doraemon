@@ -37,7 +37,7 @@ doraemon -h
 # SSH Server management
 
 run `doraemon`    
-![doraemon ssh](/doraemon_ssh.gif)
+![doraemon ssh](/resources/doraemon_ssh.gif)
 
 ## config
 
@@ -143,13 +143,13 @@ Share folder via http service
 ```
 doraemon srv .
 ```    
-![doraemon srv](/doraemon_srv.gif)
+![doraemon srv](/resources/doraemon_srv.gif)
 
 
 
 # custom command
 run `doraemon cmd`    
-![doraemon cmd](/doraemon_cmd.gif)
+![doraemon cmd](/resources/doraemon_cmd.gif)
 
 manage commonly used command
 
