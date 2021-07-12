@@ -102,9 +102,11 @@ func (c *SSHBaseConfig) SSHConfig() *ssh.ClientConfig {
 		Timeout:         timeout,
 	}
 }
+
 func (c *SSHBaseConfig) AuthMethodName() AuthMethod {
 	return c.MethodName
 }
+
 func (c *SSHBaseConfig) GetProxy() SSHConfig {
 	return c.Proxy
 }
@@ -116,6 +118,7 @@ func (c *SSHBaseConfig) SetProxy(proxyConfig SSHConfig) {
 func (c *SSHBaseConfig) GetURI() string {
 	return c.URI
 }
+
 func (c *SSHBaseConfig) GetStartCommand() string {
 	return c.StartCommand
 }
@@ -133,6 +136,7 @@ func (s *sshClient) SetLog(path string, timestamp bool) {
 func (s *sshClient) CreateSession() (*ssh.Session, error) {
 	return s.Client.NewSession()
 }
+
 func (s *sshClient) Shell(session *ssh.Session) (err error) {
 	// Input terminal Make raw
 	fd := int(os.Stdin.Fd())
@@ -187,6 +191,7 @@ func (s *sshClient) setupShell(session *ssh.Session) error {
 	// Request tty
 	return s.RequestTty(session)
 }
+
 func (s *sshClient) RequestTty(session *ssh.Session) error {
 	modes := ssh.TerminalModes{
 		ssh.ECHO:          1,
