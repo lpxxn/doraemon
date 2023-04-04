@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/c-bata/go-prompt"
+	"github.com/fatih/color"
 	"github.com/lpxxn/doraemon/config"
 	"github.com/lpxxn/doraemon/internal"
 	"github.com/spf13/cobra"
@@ -40,7 +41,11 @@ var (
 )
 
 func main() {
-	fmt.Println(mascot1)
+	// Mix up foreground and background colors, create new mixes!
+	blue := color.New(color.FgBlue)
+	blue = blue.Add(color.Bold)
+	whiteBackground := blue.Add(color.BgHiWhite)
+	whiteBackground.Println(mascot1)
 	app := fx.New(fx.NopLogger,
 		fx.Provide(config.ParseConfig),
 		fx.Provide(fx.Annotated{
