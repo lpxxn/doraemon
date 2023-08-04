@@ -147,21 +147,21 @@ func (s *sshClient) Shell(session *ssh.Session) (err error) {
 	defer terminal.Restore(fd, state)
 
 	// setup
-	err = s.setupShell(session)
+    stdinPipe, err := s.setupShell(session)
+	if err != nil {
+		return err
+	}
+	// Start shell
+	err = session.Shell()
 	if err != nil {
 		return
 	}
 
 	if len(s.config.GetStartCommand()) > 0 {
 		var buf bytes.Buffer
-		buf.WriteString(s.config.GetStartCommand() + "\n")
-		session.Stdin = io.MultiReader(&buf, session.Stdin)
-	}
-
-	// Start shell
-	err = session.Shell()
-	if err != nil {
-		return
+		buf.WriteString(s.config.GetStartCommand() + "\r")
+		//session.Stdin = io.MultiReader(&buf, session.Stdin)
+		stdinPipe.Write(buf.Bytes())
 	}
 
 	// keep alive packet
@@ -175,11 +175,20 @@ func (s *sshClient) Shell(session *ssh.Session) (err error) {
 	return
 }
 
-func (s *sshClient) setupShell(session *ssh.Session) error {
+func (s *sshClient) setupShell(session *ssh.Session) (io.WriteCloser, error) {
 	// set FD
-	session.Stdin = os.Stdin
+	// session.Stdin = os.Stdin
 	session.Stdout = os.Stdout
 	session.Stderr = os.Stderr
+	stdinPipe, err := session.StdinPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		_, err = io.Copy(stdinPipe, os.Stdin)
+		session.Close()
+	}()
 
 	// Logging
 	if s.logging {
@@ -189,7 +198,7 @@ func (s *sshClient) setupShell(session *ssh.Session) error {
 		}
 	}
 	// Request tty
-	return s.RequestTty(session)
+	return stdinPipe, s.RequestTty(session)
 }
 
 func (s *sshClient) RequestTty(session *ssh.Session) error {
